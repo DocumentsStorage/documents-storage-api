@@ -10,9 +10,11 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
 @router.get("/ping")
 def ping():
     return {"Ping": "pong"}
+
 
 @router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -20,5 +22,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if len(accounts_list) > 0:
         account = loads(accounts_list[0].to_json())
         if verify_password(account['password'], form_data.password):
-            return {"access_token": jwt_authenticate(account['_id']['$oid'], account['rank']), "token_type": "bearer"}
+            return {
+                "access_token": jwt_authenticate(
+                    account['_id']['$oid'],
+                    account['rank']),
+                "token_type": "bearer"}
     raise HTTPException(403, "Check passed username or password")

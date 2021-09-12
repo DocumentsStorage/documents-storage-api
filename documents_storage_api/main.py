@@ -1,27 +1,30 @@
 
 from os import getenv
 from dotenv import load_dotenv
-
 import uvicorn
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from routers import default, accounts
-
 from mongoengine import connect, ConnectionFailure
 from services.generate_admin_account import create_admin_account
-
 
 load_dotenv()
 
 app = FastAPI()
+app.debug = getenv("DEBUG")
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=getenv("API_ORIGINS"),
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.debug = getenv("DEBUG")
+
+# Routes
+app.include_router(default.router)
+app.include_router(accounts.router)
 
 
 # Connect with database
@@ -38,18 +41,11 @@ except ConnectionFailure as error:
     print("Could not connect with database")
     print(error)
 
-
-# Routes
-app.include_router(default.router)
-app.include_router(accounts.router)
-
-
 if __name__ == "__main__":
     uvicorn.run(
-    "main:app",
-    host=getenv("API_HOST"),
-    port=int(getenv("API_PORT")),
-    log_level="info",
-    reload=getenv("DEBUG")
+        "main:app",
+        host=getenv("API_HOST"),
+        port=int(getenv("API_PORT")),
+        log_level="info",
+        reload=getenv("DEBUG")
     )
-
