@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from routers import default, accounts, document_types
+from routers import default, accounts, document_types, documents, media
 from mongoengine import connect, ConnectionFailure
 from services.generate_admin_account import create_admin_account
 
@@ -26,6 +26,8 @@ app.add_middleware(
 app.include_router(default.router)
 app.include_router(accounts.router)
 app.include_router(document_types.router)
+app.include_router(documents.router)
+app.include_router(media.router)
 
 
 # Connect with database

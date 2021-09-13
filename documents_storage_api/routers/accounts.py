@@ -1,7 +1,6 @@
 from json import loads
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-from typing import Optional
 from middlewares.require_auth import UserChecker, PermissionsChecker, UserCheckerModel
 from models.account import AccountModel, AccountModelAPI
 from services.hash_password import hash_password, verify_password
@@ -69,7 +68,7 @@ async def update_accont(account: AccountModelAPI = None, user: UserCheckerModel 
             usernames = AccountModel.objects(username=account.username)
             if usernames:
                 raise HTTPException(403, "Username is already taken")
-        except:
+        except BaseException:
             pass
 
         # Delete not passed properties
