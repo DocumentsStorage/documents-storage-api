@@ -122,12 +122,8 @@ async def update_accont(account: AccountModelAPI = None, user: UserCheckerModel 
 @router.delete("/delete")
 async def delete_account(account_id: str = "", user: UserCheckerModel = Depends(UserChecker)):
     '''Delete single account'''
-    account_id = ObjectId(account_id)
-    account_object = AccountModel.objects(id=account_id)
-    if account_object:
-        if account_id == ObjectId(
-                user['client_id']) or PermissionsChecker(
-                "admin", user['rank']):
-            AccountModel.objects(id=account_id).delete()
-            return {"delete": True}
-    raise HTTPException(404, "Not found account")
+    count = AccountModel.objects(id=ObjectId(account_id)).delete()
+    if count != 0:
+        return {"delete": True}
+    else:
+        raise HTTPException(404, "Not found account")
