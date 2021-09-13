@@ -17,6 +17,8 @@ router = APIRouter(
 async def current_account(user: UserCheckerModel = Depends(UserChecker)):
     try:
         account = loads(AccountModel.objects(id=user['client_id'])[0].to_json())
+        del account["_id"]
+        del account["password"]
     except BaseException:
         raise HTTPException(404, "Not found account")
     return account
@@ -61,7 +63,7 @@ async def update_user(account: AccountModelAPI = None, user: UserCheckerModel = 
             key: val for key,
             val in account_object.items() if val is not None}
 
-        # Update rank
+        # Update rank - only admin
         if 'rank' in account_object and PermissionsChecker(
                 "admin", user['rank']):
             account_object.update(rank=account.rank.value)
@@ -74,15 +76,15 @@ async def update_user(account: AccountModelAPI = None, user: UserCheckerModel = 
         except BaseException:
             raise HTTPException(404, "Not found account")
 
-        # Update password
-        if 'new_password' in account_object and 'password' in account_object:
-            if verify_password(
-                    account_from_db['password'],
-                    account_object['password']):
-                account_object["password"] = hash_password(
-                    account_object['new_password'])
+        # Reset password - only admin
+        if 'new_password' in account_object and PermissionsChecker("admin", user['rank']):
+            account_object["password"] = hash_password(account_object['new_password'])
+        elif 'new_password' in account_object and 'password' in account_object:
+            # Update password
+            if verify_password(account_from_db['password'], account_object['password']):
+                account_object["password"] = hash_password(account_object['new_password'])
             else:
-                raise HTTPException(403, "Invalid password")
+                raise HTTPException(403, "Invalid old password")
         else:
             try:
                 del account_object["password"]
