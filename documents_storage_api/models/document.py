@@ -1,9 +1,8 @@
+import datetime
+from enum import unique
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
-from mongoengine.fields import (
-    DateField, DynamicField, EmbeddedDocumentListField,
-    FloatField, IntField, ListField, StringField
-)
+from mongoengine.fields import DynamicField, EmbeddedDocumentListField, ListField, StringField
 from typing import Optional, List, Union
 from pydantic import BaseModel
 
@@ -13,7 +12,7 @@ from pydantic import BaseModel
 class DocumentFieldModelAPI(BaseModel):
     '''DocumentField for API'''
     name: Optional[str]
-    value: Optional[Union[str, int]]
+    value: Optional[Union[int, datetime.datetime, str]]
 
 
 class DocumentModelAPI(BaseModel):
@@ -42,14 +41,14 @@ class DocumentModelAPI(BaseModel):
 
 class DocumentFieldModel(EmbeddedDocument):
     '''DocumentField for mongoengine'''
-    name = StringField()
-    value = DynamicField(choices=[StringField, IntField, FloatField, DateField])
+    name = StringField(unique=True)
+    value = DynamicField()
 
 
 class DocumentModel(Document):
     '''Document model for mongoengine'''
-    meta = {"collection": "documents_types"}
+    meta = {"collection": "documents"}
     title = StringField()
     description = StringField()
-    media_files = ListField(StringField)
+    media_files = ListField(StringField())
     fields = EmbeddedDocumentListField(DocumentFieldModel)

@@ -67,7 +67,7 @@ class DocumentTypeFieldModel(EmbeddedDocument):
 
 class DocumentTypeModel(Document):
     '''DocumentType model for mongoengine'''
-    meta = {"collection": "documents_types"}
+    meta = {"collection": "document_types"}
     title = StringField()
     description = StringField()
     fields = EmbeddedDocumentListField(DocumentTypeFieldModel)

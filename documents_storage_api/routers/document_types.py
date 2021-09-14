@@ -25,7 +25,6 @@ async def add_document_type(document_type: DocumentTypeModelAPI):
         title=document_type.title,
         description=document_type.description,
         fields=fields,
-        media_files=document_type.media_files
     )
     document_type = document_type_object.save()
     document_type_id = loads(document_type.to_json())["_id"]
