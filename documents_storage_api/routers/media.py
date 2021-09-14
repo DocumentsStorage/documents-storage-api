@@ -20,7 +20,7 @@ async def add_media_file(media_file: UploadFile = File(...)):
     except Exception as e:
         print(e)
     file_extension = pathlib.Path(media_file.filename).suffix
-    file_name = os.getcwd()+"/media_files/"+str(media_file_id)+file_extension
+    file_name = os.getcwd() + "/media_files/" + str(media_file_id) + file_extension
     with open(file_name, 'wb+') as f:
         f.write(media_file.file.read())
         f.close()
@@ -29,7 +29,7 @@ async def add_media_file(media_file: UploadFile = File(...)):
 
 @router.delete("")
 async def delete_media_file(media_file_id: str = ""):
-    for entry in os.scandir(os.getcwd()+"/media_files/"):
+    for entry in os.scandir(os.getcwd() + "/media_files/"):
         if str(pathlib.Path(entry.name).with_suffix('')) == media_file_id:
             os.remove(entry.path)
             return {"deleted": True}
