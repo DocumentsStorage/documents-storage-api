@@ -21,7 +21,6 @@ class AccountModelAPI(BaseModel):
         super().__init_subclass__(**kwargs)
         if optional_fields:
             for field in optional_fields:
-                print(field)
                 cls.__fields__[field].outer_type_ = Optional
                 cls.__fields__[field].required = False
 

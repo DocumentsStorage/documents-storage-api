@@ -4,6 +4,7 @@ from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from middlewares.require_auth import UserChecker
 from models.document import DocumentModel, DocumentModelAPI
+from routers.media import delete_media_files
 
 router = APIRouter(
     prefix="/documents",
@@ -84,7 +85,10 @@ async def get_documents_list(skip: int = 0, limit: int = 30):
 @router.delete("")
 async def delete_document(document_id: str = ""):
     '''Delete single document'''
-    count = DocumentModel.objects(id=ObjectId(document_id)).delete()
+    document_object = DocumentModel.objects(id=ObjectId(document_id))
+    document_json = loads(document_object.to_json())[0]
+    await delete_media_files(document_json['media_files'])
+    count = document_object.delete()
     if count != 0:
         return {"delete": True}
     else:
