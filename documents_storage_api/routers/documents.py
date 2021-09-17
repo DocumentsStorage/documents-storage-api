@@ -35,8 +35,9 @@ async def add_document(document: DocumentModelAPI):
     return {"id": document_id}
 
 
-@router.patch("")
+@router.put("")
 async def update_document(document: DocumentModelAPI = None):
+    '''This path allow to - update: title, description, media_files and overwrite: fields'''
     document_object = dict(document)
 
     # Delete not passed properties
@@ -52,6 +53,12 @@ async def update_document(document: DocumentModelAPI = None):
     except BaseException:
         raise HTTPException(404, "Not found document")
 
+    fields = []
+    for field in document.fields:
+        fields.append({
+            "name": field.name,
+            "value": field.value
+        })
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
 
@@ -59,19 +66,10 @@ async def update_document(document: DocumentModelAPI = None):
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
-        media_files=document_from_db['media_files']
+        media_files=document_from_db['media_files'],
+        set__fields=fields
     )
 
-    for field in document.fields:
-        parsed_field = {
-            "name": field.name,
-            "value": field.value
-        }
-        count = DocumentModel.objects(
-            id=document.id, fields__name=field.name).update_one(
-            set__fields__S__value=field.value)
-        if count != 1:
-            DocumentModel.objects(id=document.id).update_one(add_to_set__fields=parsed_field)
     return {"updated": True}
 
 

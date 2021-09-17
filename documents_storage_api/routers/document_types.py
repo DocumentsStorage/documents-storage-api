@@ -21,14 +21,55 @@ async def add_document_type(document_type: DocumentTypeModelAPI):
             "name": field.name,
             "value_type": field.value_type.value
         })
-    document_type_object = DocumentTypeModel(
-        title=document_type.title,
-        description=document_type.description,
-        fields=fields,
+
+    document_type_object = DocumentTypeModel.objects(title=document_type.title)
+    if not document_type_object:
+        document_type = DocumentTypeModel(
+            title=document_type.title,
+            description=document_type.description,
+            fields=fields,
+        )
+        document_type = document_type.save()
+        document_type_id = loads(document_type.to_json())["_id"]
+        return {"id": document_type_id}
+    else:
+        raise HTTPException(403, "Document type title is already taken")
+
+
+@router.put("")
+async def update_document_type(document: DocumentTypeModelAPI = None):
+    '''This path allow to - update: title, description and overwrite: fields'''
+    document_type_object = dict(document)
+
+    # Delete not passed properties
+    document_type_object = {
+        key: val for key,
+        val in document_type_object.items() if val is not None}
+
+    # Get previous state of document
+    try:
+        document_from_db = loads(
+            DocumentTypeModel.objects(
+                id=document.id)[0].to_json())
+    except BaseException:
+        raise HTTPException(404, "Not found document type")
+
+    fields = []
+    for field in document.fields:
+        fields.append({
+            "name": field.name,
+            "value_type": field.value_type.value
+        })
+    # Update dict which will be uploaded to db
+    document_from_db.update(document_type_object)
+
+    DocumentTypeModel.objects(id=document.id).update(
+        title=document_from_db['title'],
+        description=document_from_db['description'],
+        set__fields=fields
     )
-    document_type = document_type_object.save()
-    document_type_id = loads(document_type.to_json())["_id"]
-    return {"id": document_type_id}
+
+    return {"updated": True}
 
 
 @router.get("")
