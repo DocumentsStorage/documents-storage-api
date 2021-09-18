@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.get("/session")
-async def current_account(user: UserCheckerModel = Depends(UserChecker)):
+async def get_current_account(user: UserCheckerModel = Depends(UserChecker)):
     '''Get current session account data'''
     try:
         account = loads(AccountModelDB.objects(id=user['client_id'])[0].to_json())
@@ -25,7 +25,7 @@ async def current_account(user: UserCheckerModel = Depends(UserChecker)):
 
 
 @router.get("/list")
-async def list_accounts(skip: int = 0, limit: int = 10, user: UserCheckerModel = Depends(UserChecker)):
+async def get_accounts_list(skip: int = 0, limit: int = 10, user: UserCheckerModel = Depends(UserChecker)):
     '''Get list of accounts, requires admin rank'''
     if PermissionsChecker("admin", user['rank']):
         accounts_list = loads(
@@ -36,7 +36,7 @@ async def list_accounts(skip: int = 0, limit: int = 10, user: UserCheckerModel =
         return accounts_list
 
 
-@router.post("/add")
+@router.post("")
 async def add_account(account: CreateAccountModel, user: UserCheckerModel = Depends(UserChecker)):
     '''Add single account'''
     if PermissionsChecker("admin", user['rank']):
@@ -56,7 +56,7 @@ async def add_account(account: CreateAccountModel, user: UserCheckerModel = Depe
             raise HTTPException(403, "Username is already taken")
 
 
-@router.patch("/update")
+@router.patch("")
 async def update_accont(account: UpdateAccountModel = None, user: UserCheckerModel = Depends(UserChecker)):
     '''Update single account'''
     if account.id == user['client_id'] or PermissionsChecker(
@@ -118,7 +118,7 @@ async def update_accont(account: UpdateAccountModel = None, user: UserCheckerMod
         return {"updated": True}
 
 
-@router.delete("/delete")
+@router.delete("")
 async def delete_account(account_id: str = "", user: UserCheckerModel = Depends(UserChecker)):
     '''Delete single account'''
     count = AccountModelDB.objects(id=ObjectId(account_id)).delete()

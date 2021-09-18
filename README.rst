@@ -1,9 +1,30 @@
-Initial admin account credentials - username: ``admin``, password: ``documents-storage-supervisor``
+| Initial admin account credentials:
+| username: ``admin``
+| password: ``documents-storage-supervisor``
 
-# Developing (with poetry)
-* Go to directory where you cloned repository
-* Install dependencies ``poetry install``
-* Enable shell with dependencies ``poetry shell``
-* Copy .env.prod to .env and configure it
-* Run ``python documents_storage_api/main.py``
-* **API documentation is available under http://API_IP/docs**
+===========
+Development
+===========
+
+It is recommended to use tool `Poetry
+<https://python-poetry.org/>`_ with python 3.9
+
+
+-----------
+With poetry
+-----------
+#. Pull repository to desired directory
+#. Run ``poetry install``
+#. Copy ``./documents_storage_api/.env.prod`` to ``./documents_storage_api/.env`` and edit to match your requirements
+#. From repository directory run ``poetry shell`` and ``python home_warehouse_api/main.py``
+
+--------------
+Without poetry
+--------------
+#. Setup python for version 3.9
+#. Pull repository to desired directory
+#. Install packages from requirements file
+#. Copy ``./documents_storage_api/.env.prod`` to ``./documents_storage_api/.env`` and edit to match your requirements
+#. From repository directory run ``python home_warehouse_api/main.py``
+
+**API documentation is available under http://API_IP/docs**
