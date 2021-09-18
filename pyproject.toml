@@ -13,6 +13,7 @@ python-jose = "^3.3.0"
 mongoengine = "^0.23.1"
 python-multipart = "^0.0.5"
 PyJWT = "^2.1.0"
+aiofiles = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

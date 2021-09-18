@@ -2,7 +2,7 @@ from json import loads
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from models.account import AccountModel
+from models.account import AccountModelDB
 from services.auth import jwt_authenticate
 from services.hash_password import verify_password
 
@@ -18,7 +18,7 @@ def ping():
 
 @router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    accounts_list = AccountModel.objects(username=form_data.username)
+    accounts_list = AccountModelDB.objects(username=form_data.username)
     if len(accounts_list) > 0:
         account = loads(accounts_list[0].to_json())
         if verify_password(account['password'], form_data.password):
