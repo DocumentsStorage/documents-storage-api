@@ -38,7 +38,7 @@ async def add_document(document: DocumentModelAPI):
 
 @router.put("")
 async def update_document(document: DocumentModelAPI = None):
-    '''This path allow to - update: title, description, media_files and overwrite: fields'''
+    '''This path allow to - update: title, description and overwrite: fields, media_files'''
     document_object = dict(document)
 
     # Delete not passed properties
@@ -60,6 +60,8 @@ async def update_document(document: DocumentModelAPI = None):
             "name": field.name,
             "value": field.value
         })
+
+    media_files = document.media_files
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
 
@@ -67,7 +69,7 @@ async def update_document(document: DocumentModelAPI = None):
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
-        media_files=document_from_db['media_files'],
+        media_files=media_files,
         set__fields=fields
     )
 

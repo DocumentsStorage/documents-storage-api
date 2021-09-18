@@ -53,5 +53,5 @@ async def delete_media_files(media_files_ids: List[str]):
 
     if len(media_files_ids) == 0:
         return {"deleted": True}
-
-    raise HTTPException(404, f'Not found media files: {media_files_ids}')
+    else:
+        return {"message": 'Not found media files: {media_files_ids}'}
