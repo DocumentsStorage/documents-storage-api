@@ -3,10 +3,10 @@ from models.document_type.base import DocumentTypeModelAPI
 # Input Models
 
 
-_create_fields = DocumentTypeModelAPI.__fields__.keys() - {'title', 'description', 'fields'}
+_create_fields = DocumentTypeModelAPI.__fields__.keys() - {'title'}
 
 
-class CreateDocumenTypeModel(DocumentTypeModelAPI, optional_fields=_create_fields):
+class CreateDocumentTypeModel(DocumentTypeModelAPI, optional_fields=_create_fields):
     class Config:
         schema_extra = {
             "example": {

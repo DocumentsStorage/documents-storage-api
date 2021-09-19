@@ -5,7 +5,14 @@ from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentList
 from typing import Optional, List, Union
 from pydantic import BaseModel
 
-# Models
+from mongoengine import Document
+from mongoengine.document import EmbeddedDocument
+from mongoengine.fields import EmbeddedDocumentListField, StringField
+
+from typing import Optional, List
+from pydantic import BaseModel, validator
+
+from models.common import PydanticObjectId
 
 
 class DocumentFieldModelAPI(BaseModel):
@@ -14,36 +21,31 @@ class DocumentFieldModelAPI(BaseModel):
     value: Optional[Union[float, int, datetime.datetime, str]]
 
 
-class DocumentModelAPI(BaseModel):
-    '''Account model for API'''
-    id: Optional[str]
-    title: Optional[str]
-    description: Optional[str]
-    media_files: Optional[List[str]]
-    fields: Optional[List[DocumentFieldModelAPI]]
+# API Models
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "title": "Invoice title",
-                "description": "Invoice description",
-                "fields": [
-                    {
-                        "name": "Seller name",
-                        "value": "xox"
-                    },
-                    {
-                        "name": "Amount",
-                        "value": 4.12
-                    },
-                    {
-                        "name": "Date",
-                        "value": "2021-09-14T14:27:24.000+00:00"
-                    },
-                ],
-                "media_files": ["4156883c-a183-4d59-b87a-44cbc4cc2fba", "55d42121-d533-4c5e-9591-e324aaaf73a3"]
-            }
-        }
+class DocumentModelAPI(BaseModel):
+    '''DocumentType Base model'''
+    id: PydanticObjectId
+    title: str
+    description: str
+    media_files: List[str]
+    fields: List[DocumentFieldModelAPI]
+
+    def __init_subclass__(cls, optional_fields=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if optional_fields:
+            for field in optional_fields:
+                cls.__fields__[field].outer_type_ = Optional
+                cls.__fields__[field].required = False
+
+    @validator('title')
+    def title_has_to_have_one_char(cls, v):
+        if len(v) == 0:
+            raise ValueError('must contain at least one char')
+        return v.title()
+
+
+# Mongoengine Models
 
 
 class DocumentFieldModel(EmbeddedDocument):

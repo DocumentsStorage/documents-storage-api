@@ -4,7 +4,7 @@ from fastapi.params import Path
 from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
 from models.common import PydanticObjectId
-from models.document_type.api import CreateDocumenTypeModel, UpdateDocumentTypeModel
+from models.document_type.api import CreateDocumentTypeModel, UpdateDocumentTypeModel
 from models.document_type.base import DocumentTypeModel
 from models.document_type.responses import (
     DocumentTypeDeletionResponse,
@@ -25,7 +25,7 @@ router = APIRouter(
                  403: {"model": DocumentTypeTitleTakenResponse}}
              )
 async def add_document_type(
-    document_type: CreateDocumenTypeModel
+    document_type: CreateDocumentTypeModel
 ):
     '''Add single document type'''
     fields = []

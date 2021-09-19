@@ -1,23 +1,32 @@
 from datetime import datetime
 from json import loads
-from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Path
+from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
-from models.document import DocumentModel, DocumentModelAPI
+from models.common import PydanticObjectId
+from models.document.api import CreateDocumentModel, UpdateDocumentModel
+from models.document.base import DocumentModel
+from models.document.responses import DocumentDeletionResponse, DocumentNotFoundResponse, DocumentUpdatedResponse
 from routers.media import delete_media_files
 
 router = APIRouter(
     prefix="/documents",
     tags=["documents"],
     dependencies=[Depends(UserChecker)],
-    responses={404: {"description": "Not found"}}
 )
 
 # Documents
 
 
-@router.post("")
-async def add_document(document: DocumentModelAPI):
+@router.post("",
+             responses={
+                 201: {"description": "Successfully created document"},
+             }
+             )
+async def add_document(
+    document: CreateDocumentModel
+):
     fields = []
     for field in document.fields:
         fields.append({
@@ -33,11 +42,16 @@ async def add_document(document: DocumentModelAPI):
     )
     document = document_object.save()
     document_id = loads(document.to_json())["_id"]
-    return {"id": document_id}
+    return JSONResponse(status_code=201, content={"id": document_id})
 
 
-@router.put("")
-async def update_document(document: DocumentModelAPI = None):
+@router.put("/{document_id}",
+            responses={200: {"model": DocumentUpdatedResponse},
+                       404: {"model": DocumentNotFoundResponse}})
+async def update_document(
+    document: UpdateDocumentModel,
+    document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
+):
     '''This path allow to - update: title, description and overwrite: fields, media_files'''
     document_object = dict(document)
 
@@ -50,7 +64,7 @@ async def update_document(document: DocumentModelAPI = None):
     try:
         document_from_db = loads(
             DocumentModel.objects(
-                id=document.id)[0].to_json())
+                id=document_id)[0].to_json())
     except BaseException:
         raise HTTPException(404, "Not found document")
 
@@ -61,11 +75,12 @@ async def update_document(document: DocumentModelAPI = None):
             "value": field.value
         })
 
-    media_files = document.media_files
+    media_files = document.media_files if "media_files" in document else document_from_db['media_files']
+
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
 
-    DocumentModel.objects(id=document.id).update(
+    DocumentModel.objects(id=document_id).update(
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
@@ -73,25 +88,32 @@ async def update_document(document: DocumentModelAPI = None):
         set__fields=fields
     )
 
-    return {"updated": True}
+    return {"message": DocumentUpdatedResponse().message}
 
 
-@router.get("")
-async def get_documents_list(skip: int = 0, limit: int = 30):
+@router.get("",
+            responses={200: {"description": "Successfully obtains list of documents"}})
+async def get_documents_list(
+    skip: int = 0,
+    limit: int = 30
+):
     '''Get list of documents'''
     documents_list = loads(
         DocumentModel.objects()[skip:skip + limit].to_json())
     return documents_list
 
 
-@router.delete("")
-async def delete_document(document_id: str = ""):
+@router.delete("/{document_id}",
+               responses={200: {"model": DocumentDeletionResponse}, 404: {"model": DocumentNotFoundResponse}})
+async def delete_document(
+    document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
+):
     '''Delete single document'''
-    document_object = DocumentModel.objects(id=ObjectId(document_id))
+    document_object = DocumentModel.objects(id=document_id)
     document_json = loads(document_object.to_json())[0]
     await delete_media_files(document_json['media_files'])
     count = document_object.delete()
     if count != 0:
-        return {"delete": True}
+        return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})
     else:
-        raise HTTPException(404, "Not found document")
+        raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
