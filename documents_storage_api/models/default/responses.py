@@ -3,7 +3,7 @@ from common.responses import Message
 
 
 class PingResponse(Message):
-    message = "ping"
+    message = "pong"
 
 
 class CredentialsResponse(BaseModel):

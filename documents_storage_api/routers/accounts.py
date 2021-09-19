@@ -1,5 +1,6 @@
 from json import loads
 from fastapi import APIRouter, Depends, HTTPException, Path
+from starlette.responses import JSONResponse
 from common.responses import Message, NotEnoughPermissions
 from middlewares.require_auth import UserChecker, PermissionsChecker, UserCheckerModel
 from models.account.api import CreateAccountModel, UpdateAccountModel
@@ -26,7 +27,7 @@ async def get_current_account(
         del account["_id"]
         del account["password"]
     except BaseException:
-        raise HTTPException(404, AccountNotFoundResponse().message)
+        raise HTTPException(404, {"message": AccountNotFoundResponse().message})
     return account
 
 
@@ -49,7 +50,7 @@ async def get_accounts_list(
 
 @router.post("",
              responses={
-                 200: {"description": "Successfully created account"},
+                 201: {"description": "Successfully created account"},
                  403: {"model": Message}}
              )
 async def add_account(
@@ -70,10 +71,10 @@ async def add_account(
             )
             account = account.save()
             account_id = loads(account.to_json())["_id"]
-            return {"id": account_id}
+            return JSONResponse(status_code=201, content={"id": account_id})
         else:
             raise HTTPException(403, {"message": "Username is already taken"})
-    raise HTTPException(403, NotEnoughPermissions().message)
+    raise HTTPException(403, {"message": NotEnoughPermissions().message})
 
 
 @router.patch("/{account_id}",
@@ -115,7 +116,7 @@ async def update_accont(
                 AccountModelDB.objects(
                     id=account_id)[0].to_json())
         except BaseException:
-            raise HTTPException(404, AccountNotFoundResponse().message)
+            raise HTTPException(404, {"message": AccountNotFoundResponse().message})
 
         # Reset password - only admin
         if 'new_password' in account_object and PermissionsChecker("admin", user['rank']):
@@ -145,10 +146,10 @@ async def update_accont(
         )
         return {"message": AccountUpdatedResponse().message}
     else:
-        raise HTTPException(403, NotEnoughPermissions().message)
+        raise HTTPException(403, {"message": NotEnoughPermissions().message})
 
 
-@router.delete("",
+@router.delete("/{account_id}",
                responses={200: {"model": AccountDeletionResponse}, 404: {"model": AccountNotFoundResponse}})
 async def delete_account(
     account_id: PydanticObjectId = Path(..., title="The ID of the account to delete"),
@@ -160,6 +161,6 @@ async def delete_account(
         if count != 0:
             return {"message": AccountDeletionResponse().message}
         else:
-            raise HTTPException(404, AccountNotFoundResponse().message)
+            raise HTTPException(404, {"message": AccountNotFoundResponse().message})
     else:
-        raise HTTPException(403, NotEnoughPermissions().message)
+        raise HTTPException(403, {"message": NotEnoughPermissions().message})

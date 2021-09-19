@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("/ping", response_model=PingResponse)
 def ping():
-    return JSONResponse(status_code=200, content=PingResponse().message)
+    return JSONResponse(status_code=200, content={"message": PingResponse().message})
 
 
 @router.post("/token",
@@ -32,4 +32,4 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     account['_id']['$oid'],
                     account['rank']),
                 "token_type": "bearer"}
-    raise HTTPException(403, WrongCredentialsResponse().message)
+    raise HTTPException(403, {"message": WrongCredentialsResponse().message})
