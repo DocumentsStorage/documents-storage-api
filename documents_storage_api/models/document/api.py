@@ -3,7 +3,7 @@ from models.document.base import DocumentModelAPI
 # Input Models
 
 
-_create_fields = DocumentModelAPI.__fields__.keys() - {'title', 'media_files'}
+_create_fields = DocumentModelAPI.__fields__.keys() - {'title'}
 
 
 class CreateDocumentModel(DocumentModelAPI, optional_fields=_create_fields):

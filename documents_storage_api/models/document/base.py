@@ -1,7 +1,7 @@
 import datetime
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
-from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentListField, ListField, StringField
+from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentListField, ListField, StringField, UUIDField
 from typing import Optional, List, Union
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ from mongoengine.fields import EmbeddedDocumentListField, StringField
 from typing import Optional, List
 from pydantic import BaseModel, validator
 
-from models.common import PydanticObjectId
+from models.common import PydanticObjectId, PydanticUUIDString
 
 
 class DocumentFieldModelAPI(BaseModel):
@@ -28,7 +28,7 @@ class DocumentModelAPI(BaseModel):
     id: PydanticObjectId
     title: str
     description: str
-    media_files: List[str]
+    media_files: List[PydanticUUIDString]
     fields: List[DocumentFieldModelAPI]
 
     def __init_subclass__(cls, optional_fields=None, **kwargs):
@@ -61,5 +61,5 @@ class DocumentModel(Document):
     modification_date = DateTimeField()
     title = StringField(required=True)
     description = StringField()
-    media_files = ListField(StringField())
+    media_files = ListField(UUIDField())
     fields = EmbeddedDocumentListField(DocumentFieldModel)

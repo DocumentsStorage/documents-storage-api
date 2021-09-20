@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from json import loads
 from fastapi import APIRouter, Depends, HTTPException
@@ -16,6 +17,15 @@ router = APIRouter(
     dependencies=[Depends(UserChecker)],
 )
 
+
+def UUIDFromString(media_files):
+    return list(map(uuid.UUID, media_files))
+
+
+def StringFromUUID(media_files):
+    return list(map(lambda file: str(file['$uuid']), media_files))
+
+
 # Documents
 
 
@@ -28,16 +38,20 @@ async def add_document(
     document: CreateDocumentModel
 ):
     fields = []
-    for field in document.fields:
-        fields.append({
-            "name": field.name,
-            "value": field.value
-        })
+    if document.fields:
+        for field in document.fields:
+            fields.append({
+                "name": field.name,
+                "value": field.value
+            })
+
+    media_files = UUIDFromString(document.media_files) if document.media_files else []
+
     document_object = DocumentModel(
         creation_date=datetime.now(),
         title=document.title,
         description=document.description,
-        media_files=document.media_files,
+        media_files=media_files,
         fields=fields
     )
     document = document_object.save()
@@ -75,7 +89,10 @@ async def update_document(
             "value": field.value
         })
 
-    media_files = document.media_files if "media_files" in document else document_from_db['media_files']
+    if "media_files" in document:
+        media_files = UUIDFromString(document.media_files)
+    else:
+        media_files = StringFromUUID(document_from_db['media_files'])
 
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
