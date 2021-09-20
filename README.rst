@@ -5,6 +5,7 @@
 ===========
 Development
 ===========
+**API documentation is available under http://API_IP/docs**
 
 It is recommended to use tool `Poetry
 <https://python-poetry.org/>`_ with python 3.9
@@ -27,4 +28,9 @@ Without poetry
 #. Copy ``./documents_storage_api/.env.prod`` to ``./documents_storage_api/.env`` and edit to match your requirements
 #. From repository directory run ``python home_warehouse_api/main.py``
 
-**API documentation is available under http://API_IP/docs**
+-------
+Testing
+-------
+#. Make sure you have installed API with steps listed before.
+#. While tesiting export path for API files ``export PYTHONPATH=documents_storage_api``
+#. Run command with poetry : ``poetry shell`` and run ``pytest``; or without poetry just run ``pytest``

@@ -2,19 +2,20 @@ from mongoengine import Document
 from mongoengine.fields import BooleanField, StringField
 
 from typing import Optional
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel, validator
 
 from middlewares.require_auth import RankEnum
+from models.common import PydanticObjectId
 
 # API Models
 
 
 class AccountModelAPI(BaseModel):
-    '''Account model for API'''
-    id: str
+    '''Account Base model'''
+    id: PydanticObjectId
     username: str
     password: str
-    new_password: Optional[str]
+    new_password: str
     rank: RankEnum
 
     def __init_subclass__(cls, optional_fields=None, **kwargs):
@@ -24,45 +25,17 @@ class AccountModelAPI(BaseModel):
                 cls.__fields__[field].outer_type_ = Optional
                 cls.__fields__[field].required = False
 
-
-# Set required fields
-_create_fields = AccountModelAPI.__fields__.keys() - {'username', 'password', 'rank'}
-
-
-class CreateAccountModel(AccountModelAPI, optional_fields=_create_fields):
     @validator('username')
     def username_has_to_have_one_char(cls, v):
         if len(v) == 0:
             raise ValueError('must contain at least one char')
         return v.title()
 
-    @validator('password')
-    def password_has_to_have_one_char(cls, v):
+    @validator('new_password')
+    def new_password_has_to_have_one_char(cls, v):
         if len(v) == 0:
             raise ValueError('must contain at least one char')
         return v.title()
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "username": "John",
-                "password": "36smA4Sd",
-                "rank": "user"
-            }
-        }
-
-
-# Set required fields
-_update_fields = AccountModelAPI.__fields__.keys() - {'id'}
-
-
-class UpdateAccountModel(AccountModelAPI, optional_fields=_update_fields):
-    class Config:
-        schema_extra = {
-            "example": {
-                "id": ""
-            }
-        }
 
 
 # Mongoengine Models

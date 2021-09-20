@@ -3,8 +3,12 @@ import uuid
 from typing import List
 import pathlib
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi.param_functions import Query
 from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
+from models.common import PydanticUUIDString
+from models.media.responses import MediaDeletionResponse, MediaNotFoundResponse
 
 MEDIA_FILES_PATH = os.getcwd() + "/data/media_files/"
 
@@ -12,20 +16,27 @@ router = APIRouter(
     prefix="/media",
     tags=["media"],
     dependencies=[Depends(UserChecker)],
-    responses={404: {"description": "Not found"}}
 )
 
 
-@router.get("/{media_id}")
-async def get_single_media_file(media_id):
+@router.get("/{media_id}",
+            responses={
+                200: {"description": "File was found"},
+                404: {"model": MediaNotFoundResponse}
+            })
+async def get_single_media_file(media_id: PydanticUUIDString):
     for entry in os.scandir(MEDIA_FILES_PATH):
         if str(pathlib.Path(entry.name).with_suffix('')) == media_id:
             return FileResponse(MEDIA_FILES_PATH + entry.name)
-    raise HTTPException(404, "Not found media file")
+    raise HTTPException(404, {"message": MediaNotFoundResponse().message})
 
 
-@router.post("")
-async def add_media_files(media_files: List[UploadFile] = File(...)):
+@router.post("", responses={
+    201: {"description": "Successfully added media files"},
+})
+async def add_media_files(
+    media_files: List[UploadFile] = File(...)
+):
     try:
         pathlib.Path(MEDIA_FILES_PATH).mkdir(parents=True, exist_ok=True)
     except Exception as e:
@@ -39,19 +50,25 @@ async def add_media_files(media_files: List[UploadFile] = File(...)):
         with open(file_name, 'wb+') as f:
             f.write(media_file.file.read())
             f.close()
-        media_files_ids.append(media_file_id)
-    return {"ids": media_files_ids}
+        media_files_ids.append(str(media_file_id))
+    return JSONResponse(status_code=201, content={"ids": media_files_ids})
 
 
-@router.delete("")
-async def delete_media_files(media_files_ids: List[str]):
+@router.delete("",
+               responses={
+                   200: {"model": MediaDeletionResponse},
+                   404: {"description": "Some media files were not found, in message there is list of not deleted media"}
+               })
+async def delete_media_files(
+    media_files_ids: List[PydanticUUIDString] = Query(None)
+):
     for entry in os.scandir(MEDIA_FILES_PATH):
-        for media_file_id in media_files_ids:
-            if str(pathlib.Path(entry.name).with_suffix('')) == media_file_id:
-                media_files_ids.remove(media_file_id)
+        for id in media_files_ids:
+            if str(pathlib.Path(entry.name).with_suffix('')) == id:
+                media_files_ids.remove(id)
                 os.remove(entry.path)
 
     if len(media_files_ids) == 0:
-        return {"deleted": True}
+        return JSONResponse(status_code=200, content={"message": MediaDeletionResponse().message})
     else:
         return {"message": 'Not found media files: {media_files_ids}'}

@@ -1,19 +1,32 @@
 from json import loads
-from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-from middlewares.require_auth import UserChecker, UserCheckerModel
-from models.document_type import DocumentTypeModel, DocumentTypeModelAPI
+from fastapi.params import Path
+from starlette.responses import JSONResponse
+from middlewares.require_auth import UserChecker
+from models.common import PydanticObjectId
+from models.document_type.api import CreateDocumentTypeModel, UpdateDocumentTypeModel
+from models.document_type.base import DocumentTypeModel
+from models.document_type.responses import (
+    DocumentTypeDeletionResponse,
+    DocumentTypeTitleTakenResponse,
+    DocumentTypeNotFoundResponse,
+    DocumentTypeUpdatedResponse)
 
 router = APIRouter(
     prefix="/document_types",
     tags=["document_types"],
-    dependencies=[Depends(UserChecker)],
-    responses={404: {"description": "Not found"}}
+    dependencies=[Depends(UserChecker)]
 )
 
 
-@router.post("")
-async def add_document_type(document_type: DocumentTypeModelAPI):
+@router.post("",
+             responses={
+                 201: {"description": "Successfully created document type"},
+                 403: {"model": DocumentTypeTitleTakenResponse}}
+             )
+async def add_document_type(
+    document_type: CreateDocumentTypeModel
+):
     '''Add single document type'''
     fields = []
     for field in document_type.fields:
@@ -31,13 +44,20 @@ async def add_document_type(document_type: DocumentTypeModelAPI):
         )
         document_type = document_type.save()
         document_type_id = loads(document_type.to_json())["_id"]
-        return {"id": document_type_id}
+        return JSONResponse(status_code=201, content={"id": document_type_id})
     else:
-        raise HTTPException(403, "Document type title is already taken")
+        raise HTTPException(403, {"message": DocumentTypeTitleTakenResponse().message})
 
 
-@router.put("")
-async def update_document_type(document: DocumentTypeModelAPI = None):
+@router.put("/{document_type_id}",
+            responses={
+                200: {"model": DocumentTypeUpdatedResponse},
+                404: {"model": DocumentTypeNotFoundResponse}
+            })
+async def update_document_type(
+    document: UpdateDocumentTypeModel,
+    document_type_id: PydanticObjectId = Path(..., title="The ID of the document type to update")
+):
     '''This path allow to - update: title, description and overwrite: fields'''
     document_type_object = dict(document)
 
@@ -50,9 +70,9 @@ async def update_document_type(document: DocumentTypeModelAPI = None):
     try:
         document_from_db = loads(
             DocumentTypeModel.objects(
-                id=document.id)[0].to_json())
+                id=document_type_id)[0].to_json())
     except BaseException:
-        raise HTTPException(404, "Not found document type")
+        raise HTTPException(404, {"message": DocumentTypeNotFoundResponse().message})
 
     fields = []
     for field in document.fields:
@@ -63,28 +83,40 @@ async def update_document_type(document: DocumentTypeModelAPI = None):
     # Update dict which will be uploaded to db
     document_from_db.update(document_type_object)
 
-    DocumentTypeModel.objects(id=document.id).update(
+    DocumentTypeModel.objects(id=document_type_id).update(
         title=document_from_db['title'],
         description=document_from_db['description'],
         set__fields=fields
     )
 
-    return {"updated": True}
+    return JSONResponse(status_code=200, content={"message": DocumentTypeUpdatedResponse().message})
 
 
-@router.get("")
-async def get_document_types_list(skip: int = 0, limit: int = 10):
+@router.get("",
+            responses={
+                200: {"description": "Successfully obtains list of document types"},
+            })
+async def get_document_types_list(
+    skip: int = 0,
+    limit: int = 10
+):
     '''Get list of document types'''
     document_types_list = loads(
         DocumentTypeModel.objects()[skip:skip + limit].to_json())
     return document_types_list
 
 
-@router.delete("")
-async def delete_document_type(document_type_id: str = ""):
+@router.delete("/{document_type_id}",
+               responses={
+                   200: {"model": DocumentTypeDeletionResponse},
+                   404: {"model": DocumentTypeNotFoundResponse}
+               })
+async def delete_document_type(
+    document_type_id: PydanticObjectId = Path(..., title="The ID of the document type to delete")
+):
     '''Delete single document type'''
-    count = DocumentTypeModel.objects(id=ObjectId(document_type_id)).delete()
+    count = DocumentTypeModel.objects(id=document_type_id).delete()
     if count != 0:
-        return {"delete": True}
+        return JSONResponse(status_code=200, content={"message": DocumentTypeDeletionResponse().message})
     else:
-        raise HTTPException(404, "Not found document type")
+        raise HTTPException(404, {"message": DocumentTypeNotFoundResponse().message})

@@ -2,21 +2,26 @@ from json import loads
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from models.account import AccountModelDB
+from starlette.responses import JSONResponse
+from models.account.base import AccountModelDB
+from models.default.responses import CredentialsResponse, PingResponse, WrongCredentialsResponse
 from services.auth import jwt_authenticate
 from services.hash_password import verify_password
 
-router = APIRouter(
-    responses={404: {"description": "Not found"}},
-)
+router = APIRouter()
 
 
-@router.get("/ping")
+@router.get("/ping", response_model=PingResponse)
 def ping():
-    return {"Ping": "pong"}
+    return JSONResponse(status_code=200, content={"message": PingResponse().message})
 
 
-@router.post("/token")
+@router.post("/token",
+             responses={
+                 200: {"description": "Gained access", "model": CredentialsResponse},
+                 403: {"description": "Account not found or given wrong credentials.",
+                       "model": WrongCredentialsResponse}
+             })
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     accounts_list = AccountModelDB.objects(username=form_data.username)
     if len(accounts_list) > 0:
@@ -27,4 +32,4 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     account['_id']['$oid'],
                     account['rank']),
                 "token_type": "bearer"}
-    raise HTTPException(403, "Check passed username or password")
+    raise HTTPException(403, {"message": WrongCredentialsResponse().message})

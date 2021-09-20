@@ -1,4 +1,4 @@
-from models.account import AccountModelDB
+from models.account.base import AccountModelDB
 from services.hash_password import hash_password
 
 
