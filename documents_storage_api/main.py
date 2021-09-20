@@ -2,15 +2,16 @@ from os import getenv
 from dotenv import load_dotenv
 import uvicorn
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from starlette.middleware.cors import CORSMiddleware
 from routers import default, accounts, document_types, documents, media
 from mongoengine import connect, ConnectionFailure
 from services.generate_admin_account import create_admin_account
-
 load_dotenv()
 
 app = FastAPI()
 app.debug = getenv("DEBUG")
+
 
 # CORS
 app.add_middleware(
@@ -28,6 +29,35 @@ app.include_router(document_types.router)
 app.include_router(documents.router)
 app.include_router(media.router)
 
+
+# OpenAPI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="",
+        version="",
+        routes=app.routes,
+    )
+    openapi_schema["info"] = {
+        "title": "Documents Storage API",
+        "version": "0.2.0",
+        "description": "This is a OpenAPI documentation for Documents Storage API",
+        "contact": {
+            "name": "Github repository",
+            "url": "https://github.com/DocumentsStorage/documents-storage-api",
+        },
+        "license": {
+            "name": "GNU General Public License version 2",
+            "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+        },
+    }
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 # Connect with database
 try:
