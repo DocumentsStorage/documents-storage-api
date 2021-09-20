@@ -7,7 +7,7 @@ from fastapi.param_functions import Query
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
-from models.common import PydanticUUIDString
+from models.common import PydanticUUIDString, UUIDFromString
 from models.media.responses import MediaDeletionResponse, MediaNotFoundResponse
 
 MEDIA_FILES_PATH = os.getcwd() + "/data/media_files/"
@@ -25,8 +25,9 @@ router = APIRouter(
                 404: {"model": MediaNotFoundResponse}
             })
 async def get_single_media_file(media_id: PydanticUUIDString):
+    media_id = UUIDFromString([media_id])[0]
     for entry in os.scandir(MEDIA_FILES_PATH):
-        if str(pathlib.Path(entry.name).with_suffix('')) == media_id:
+        if str(pathlib.Path(entry.name).with_suffix('')) == str(media_id):
             return FileResponse(MEDIA_FILES_PATH + entry.name)
     raise HTTPException(404, {"message": MediaNotFoundResponse().message})
 
@@ -62,9 +63,10 @@ async def add_media_files(
 async def delete_media_files(
     media_files_ids: List[PydanticUUIDString] = Query(None)
 ):
+    media_files_ids = UUIDFromString(media_files_ids)
     for entry in os.scandir(MEDIA_FILES_PATH):
         for id in media_files_ids:
-            if str(pathlib.Path(entry.name).with_suffix('')) == id:
+            if str(pathlib.Path(entry.name).with_suffix('')) == str(id):
                 media_files_ids.remove(id)
                 os.remove(entry.path)
 

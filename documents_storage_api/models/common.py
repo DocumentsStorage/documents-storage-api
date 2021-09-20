@@ -28,3 +28,7 @@ class PydanticUUIDString(str):
         except Exception as e:
             raise TypeError('Invalid UUID')
         return v
+
+
+def UUIDFromString(uuid_list):
+    return list(map(uuid.UUID, uuid_list))

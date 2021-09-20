@@ -1,11 +1,10 @@
-import uuid
 from datetime import datetime
 from json import loads
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Path
 from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
-from models.common import PydanticObjectId
+from models.common import PydanticObjectId, UUIDFromString
 from models.document.api import CreateDocumentModel, UpdateDocumentModel
 from models.document.base import DocumentModel
 from models.document.responses import DocumentDeletionResponse, DocumentNotFoundResponse, DocumentUpdatedResponse
@@ -16,10 +15,6 @@ router = APIRouter(
     tags=["documents"],
     dependencies=[Depends(UserChecker)],
 )
-
-
-def UUIDFromString(media_files):
-    return list(map(uuid.UUID, media_files))
 
 
 def StringFromUUID(media_files):
@@ -89,10 +84,14 @@ async def update_document(
             "value": field.value
         })
 
-    if "media_files" in document:
-        media_files = UUIDFromString(document.media_files)
-    else:
-        media_files = StringFromUUID(document_from_db['media_files'])
+    media_files = []
+    if document.media_files:
+        if len(document.media_files) == 0:
+            media_files = []
+        elif document.media_files:
+            media_files = UUIDFromString(document.media_files)
+        else:
+            media_files = StringFromUUID(document_from_db['media_files'])
 
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
@@ -101,7 +100,7 @@ async def update_document(
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
-        media_files=media_files,
+        set__media_files=media_files,
         set__fields=fields
     )
 
@@ -128,7 +127,8 @@ async def delete_document(
     '''Delete single document'''
     document_object = DocumentModel.objects(id=document_id)
     document_json = loads(document_object.to_json())[0]
-    await delete_media_files(document_json['media_files'])
+    if len(document_json['media_files']) > 0:
+        await delete_media_files(StringFromUUID(document_json['media_files']))
     count = document_object.delete()
     if count != 0:
         return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})

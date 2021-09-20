@@ -41,7 +41,7 @@ class DocumentTypeModelAPI(BaseModel):
     def title_has_to_have_one_char(cls, v):
         if len(v) == 0:
             raise ValueError('must contain at least one char')
-        return v.title()
+        return v
 
 
 # Mongoengine Models
