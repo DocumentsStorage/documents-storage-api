@@ -51,7 +51,7 @@ async def add_media_files(
         with open(file_name, 'wb+') as f:
             f.write(media_file.file.read())
             f.close()
-        media_files_ids.append(str(media_file_id))
+        media_files_ids.append((media_file_id.hex))
     return JSONResponse(status_code=201, content={"ids": media_files_ids})
 
 

@@ -17,7 +17,7 @@ With poetry
 #. Pull repository to desired directory
 #. Run ``poetry install``
 #. Copy ``./documents_storage_api/.env.prod`` to ``./documents_storage_api/.env`` and edit to match your requirements
-#. From repository directory run ``poetry shell`` and ``python home_warehouse_api/main.py``
+#. From repository directory run ``poetry shell`` and ``python documents_storage_api/main.py``
 
 --------------
 Without poetry
@@ -26,7 +26,7 @@ Without poetry
 #. Pull repository to desired directory
 #. Install packages from requirements file
 #. Copy ``./documents_storage_api/.env.prod`` to ``./documents_storage_api/.env`` and edit to match your requirements
-#. From repository directory run ``python home_warehouse_api/main.py``
+#. From repository directory run ``python documents_storage_api/main.py``
 
 -------
 Testing
