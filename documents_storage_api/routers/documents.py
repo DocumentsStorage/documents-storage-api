@@ -46,6 +46,7 @@ async def add_document(
         creation_date=datetime.now(),
         title=document.title,
         description=document.description,
+        tags=document.tags,
         media_files=media_files,
         fields=fields
     )
@@ -61,7 +62,7 @@ async def update_document(
     document: UpdateDocumentModel,
     document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
 ):
-    '''This path allow to - update: title, description and overwrite: fields, media_files'''
+    '''This path allow to - update: title, description and overwrite: tags, fields, media_files'''
     document_object = dict(document)
 
     # Delete not passed properties
@@ -76,6 +77,10 @@ async def update_document(
                 id=document_id)[0].to_json())
     except BaseException:
         raise HTTPException(404, "Not found document")
+
+    tags = []
+    for tag in document.tags:
+        tags.append(tag)
 
     fields = []
     for field in document.fields:
@@ -100,6 +105,7 @@ async def update_document(
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
+        set__tags=tags,
         set__media_files=media_files,
         set__fields=fields
     )

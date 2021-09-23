@@ -1,8 +1,9 @@
 import datetime
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
-from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentListField, ListField, StringField, UUIDField
+from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentListField, ListField, ReferenceField, StringField, UUIDField
 from typing import Optional, List, Union
+from mongoengine.queryset.base import PULL
 from pydantic import BaseModel
 
 from mongoengine import Document
@@ -13,6 +14,7 @@ from typing import Optional, List
 from pydantic import BaseModel, validator
 
 from models.common import PydanticObjectId, PydanticUUIDString
+from models.tag.base import TagModel
 
 
 class DocumentFieldModelAPI(BaseModel):
@@ -28,6 +30,7 @@ class DocumentModelAPI(BaseModel):
     id: PydanticObjectId
     title: str
     description: str
+    tags: List[PydanticObjectId]
     media_files: List[PydanticUUIDString]
     fields: List[DocumentFieldModelAPI]
 
@@ -61,5 +64,6 @@ class DocumentModel(Document):
     modification_date = DateTimeField()
     title = StringField(required=True)
     description = StringField()
+    tags = ListField(ReferenceField(TagModel, reverse_delete_rule=PULL))
     media_files = ListField(UUIDField())
     fields = EmbeddedDocumentListField(DocumentFieldModel)
