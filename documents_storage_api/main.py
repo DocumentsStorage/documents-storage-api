@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from starlette.middleware.cors import CORSMiddleware
-from routers import default, accounts, document_types, documents, media
+from routers import default, accounts, document_types, documents, media, tags
 from mongoengine import connect, ConnectionFailure
 from services.generate_admin_account import create_admin_account
 load_dotenv()
@@ -28,6 +28,7 @@ app.include_router(accounts.router)
 app.include_router(document_types.router)
 app.include_router(documents.router)
 app.include_router(media.router)
+app.include_router(tags.router)
 
 
 # OpenAPI
