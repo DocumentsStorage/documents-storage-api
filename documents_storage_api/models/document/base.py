@@ -1,7 +1,15 @@
 import datetime
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
-from mongoengine.fields import DateTimeField, DynamicField, EmbeddedDocumentListField, ListField, ReferenceField, StringField, UUIDField
+from mongoengine.fields import (
+    DateTimeField,
+    DynamicField,
+    EmbeddedDocumentListField,
+    ListField,
+    ReferenceField,
+    StringField,
+    UUIDField
+)
 from typing import Optional, List, Union
 from mongoengine.queryset.base import PULL
 from pydantic import BaseModel
@@ -62,6 +70,7 @@ class DocumentModel(Document):
     meta = {"collection": "documents"}
     creation_date = DateTimeField()
     modification_date = DateTimeField()
+    ngrams = ListField(StringField())
     title = StringField(required=True)
     description = StringField()
     tags = ListField(ReferenceField(TagModel, reverse_delete_rule=PULL))
