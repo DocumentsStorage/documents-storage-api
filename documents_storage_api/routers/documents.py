@@ -1,14 +1,18 @@
+
+from mongoengine.queryset.visitor import Q as MQ
 from datetime import datetime
 from json import loads
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.params import Path
+from fastapi.params import Path, Query
 from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
 from models.common import PydanticObjectId, UUIDFromString
 from models.document.api import CreateDocumentModel, UpdateDocumentModel
-from models.document.base import DocumentModel
+from models.document.base import DocumentModel, DocumentModelAPI
 from models.document.responses import DocumentDeletionResponse, DocumentNotFoundResponse, DocumentUpdatedResponse
 from routers.media import delete_media_files
+from services.ngram import create_ngram
 
 router = APIRouter(
     prefix="/documents",
@@ -17,8 +21,27 @@ router = APIRouter(
 )
 
 
+return_only_fields = list(map(lambda key: key, DocumentModelAPI.__fields__.keys()))
+
+
 def StringFromUUID(media_files):
     return list(map(lambda file: str(file['$uuid']), media_files))
+
+
+def createNgrams(all_fields: UpdateDocumentModel):
+    ngrams = []
+    if all_fields.title:
+        ngrams += create_ngram(all_fields.title)
+    if all_fields.description:
+        ngrams += create_ngram(all_fields.description)
+    if all_fields.fields:
+        for field in all_fields.fields:
+            ngrams += create_ngram(field.name)
+            if isinstance(field.value, str):
+                ngrams += create_ngram(field.value)
+    # Remove duplicates
+    ngrams = list(set(ngrams))
+    return ngrams
 
 
 # Documents
@@ -43,6 +66,7 @@ async def add_document(
     media_files = UUIDFromString(document.media_files) if document.media_files else []
 
     document_object = DocumentModel(
+        ngrams=createNgrams(document),
         creation_date=datetime.now(),
         title=document.title,
         description=document.description,
@@ -102,6 +126,7 @@ async def update_document(
     document_from_db.update(document_object)
 
     DocumentModel.objects(id=document_id).update(
+        ngrams=createNgrams(document),
         modification_date=datetime.now(),
         title=document_from_db['title'],
         description=document_from_db['description'],
@@ -120,9 +145,40 @@ async def get_documents_list(
     limit: int = 30
 ):
     '''Get list of documents'''
-    documents_list = loads(
-        DocumentModel.objects()[skip:skip + limit].to_json())
-    return documents_list
+    document_objects = DocumentModel.objects().only(*return_only_fields)
+    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
+    return JSONResponse(status_code=200, content={"total": document_objects.count(), "documents": documents_parsed})
+
+
+@router.get("/search",
+            responses={200: {"description": "Returns found documents"}, 404: {"model": DocumentNotFoundResponse}})
+async def search_documents_by_text(
+    skip: int = 0,
+    limit: int = 30,
+    search_text: List[str] = Query(None)
+):
+    '''
+    Search documents by text, words with length higher or equal to 3 will be searched with ngrams,
+    other words (with length < 3) will be searched by regex (slower)
+    '''
+    ngrams, other_words = [], ['']
+    for word in search_text:
+        ngrams.append(word) if len(word) > 2 else other_words.append(word)
+    last_word = other_words[len(other_words)-1].lower()
+    ngrams = list(map(lambda x: x.lower(), ngrams))
+
+    if len(ngrams) > 0:
+        query = (MQ(ngrams__in=ngrams))
+    else:
+        query = (MQ(ngrams__contains=last_word))
+
+    document_objects = DocumentModel.objects(query).only(*return_only_fields)
+    total = len(document_objects)
+    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
+    if total > 0:
+        return JSONResponse(status_code=200, content={"total": total, "documents": documents_parsed})
+    else:
+        raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
 
 
 @router.delete("/{document_id}",

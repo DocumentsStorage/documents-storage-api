@@ -4,24 +4,24 @@ from models.document.base import DocumentModelAPI
 
 example = {
     "example": {
-                "title": "Invoice title",
-                "description": "Invoice description",
-                "fields": [
-                    {
-                        "name": "Seller name",
+        "title": "Invoice title",
+        "description": "Invoice description",
+        "fields": [
+            {
+                "name": "Seller name",
                         "value": "xox"
-                    },
-                    {
-                        "name": "Amount",
+            },
+            {
+                "name": "Amount",
                         "value": 4.12
-                    },
-                    {
-                        "name": "Date",
+            },
+            {
+                "name": "Date",
                         "value": "2021-09-14T14:27:24.000+00:00"
-                    },
-                ],
-                "media_files": ["b4ca8076f9ad465da64b7a5079a74ed7", "ec2a52c0a3c44f479d5b7bc59996cade"]
-            }
+            },
+        ],
+        "media_files": ["b4ca8076f9ad465da64b7a5079a74ed7", "ec2a52c0a3c44f479d5b7bc59996cade"]
+    }
 }
 
 # Input Models
