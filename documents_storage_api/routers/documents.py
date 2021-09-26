@@ -1,3 +1,5 @@
+
+from mongoengine.queryset.visitor import Q as MQ
 from datetime import datetime
 from json import loads
 from typing import List
@@ -143,24 +145,38 @@ async def get_documents_list(
     limit: int = 30
 ):
     '''Get list of documents'''
-    documents_list = loads(
-        DocumentModel.objects().only(*return_only_fields)[skip:skip + limit].to_json())
-    return documents_list
+    document_objects = DocumentModel.objects().only(*return_only_fields)
+    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
+    return JSONResponse(status_code=200, content={"total": document_objects.count(), "documents": documents_parsed})
 
 
-@router.get("/",
+@router.get("/search",
             responses={200: {"description": "Returns found documents"}, 404: {"model": DocumentNotFoundResponse}})
 async def search_documents_by_text(
     skip: int = 0,
     limit: int = 30,
     search_text: List[str] = Query(None)
 ):
-    '''Search documents by text, only words with length higher or equal to 3 will be searched for'''
-    search_text = filter(lambda x: len(x) > 2, search_text)
-    document_objects = loads(DocumentModel.objects(ngrams__in=search_text)
-                             .only(*return_only_fields)[skip:skip + limit].to_json())
-    if len(document_objects) > 0:
-        return JSONResponse(status_code=200, content={"documents": document_objects})
+    '''
+    Search documents by text, words with length higher or equal to 3 will be searched with ngrams,
+    other words (with length < 3) will be searched by regex (slower)
+    '''
+    ngrams, other_words = [], ['']
+    for word in search_text:
+        ngrams.append(word) if len(word) > 2 else other_words.append(word)
+    last_word = other_words[len(other_words)-1].lower()
+    ngrams = list(map(lambda x: x.lower(), ngrams))
+
+    if len(ngrams) > 0:
+        query = (MQ(ngrams__in=ngrams))
+    else:
+        query = (MQ(ngrams__contains=last_word))
+
+    document_objects = DocumentModel.objects(query).only(*return_only_fields)
+    total = len(document_objects)
+    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
+    if total > 0:
+        return JSONResponse(status_code=200, content={"total": total, "documents": documents_parsed})
     else:
         raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
 
