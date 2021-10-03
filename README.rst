@@ -1,6 +1,22 @@
-| Initial admin account credentials:
-| username: ``admin``
-| password: ``documents-storage-supervisor``
+==============
+How to install
+==============
+
+----------------------------------------------------------------------
+With `docker <https://docs.docker.com/engine/install/>`_ (recommended)
+----------------------------------------------------------------------
+- Linux/macOS
+
+   #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) './ds' 'localhost' 5001 5000``
+   #. Go to http://localhost:5000/
+   #. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+
+- Windows
+
+  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 './ds' 'localhost' 5001 5000``
+  #. Go to http://localhost:5000/
+  #. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+
 
 ===========
 Development
