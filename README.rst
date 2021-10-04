@@ -20,18 +20,18 @@ With `docker <https://docs.docker.com/engine/install/>`_ (recommended)
 --------------------------------
 Standalone (Advanced)
 --------------------------------
-  #. Install git, node, python3.9, mongoDB
-  #. Git clone ``https://github.com/DocumentsStorage/documents-storage-api`` to 'documents-storage-api'
-  #. Install requirements.txt in 'documents-storage-api'
-  #. Edit documents-storage-api/.env
-  #. Run ``python3 documents_storage_api/main.py``
-  #. Git clone ``https://github.com/DocumentsStorage/documents-storage-ui`` to 'documents-storage-ui'
-  #. Edit documents-storage-ui/.env
-  #. Install dependencies ``npm install``
-  #. Build UI ``npm run build``
-  #. Serve UI ``npm start``
-  #. Go to http://localhost:5000/
-  #. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+#. Install git, node, python3.9, mongoDB
+#. Git clone ``https://github.com/DocumentsStorage/documents-storage-api`` to 'documents-storage-api'
+#. Install requirements.txt in 'documents-storage-api'
+#. Edit documents-storage-api/.env
+#. Run ``python3 documents_storage_api/main.py``
+#. Git clone ``https://github.com/DocumentsStorage/documents-storage-ui`` to 'documents-storage-ui'
+#. Edit documents-storage-ui/.env
+#. Install dependencies ``npm install``
+#. Build UI ``npm run build``
+#. Serve UI ``npm start``
+#. Go to http://localhost:5000/
+#. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
 
 
 
