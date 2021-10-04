@@ -16,7 +16,7 @@ services:
     restart: always
     build: ../../documents-storage-ui
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - ${APP_PORT}:5000
     links:
       - documents-storage-api
   mongo:
