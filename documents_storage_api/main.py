@@ -6,7 +6,7 @@ from fastapi.openapi.utils import get_openapi
 from starlette.middleware.cors import CORSMiddleware
 from routers import default, accounts, document_types, documents, media, tags
 from mongoengine import connect, ConnectionFailure
-from services.generate_admin_account import create_admin_account
+from services.initial_setup import create_admin_account, create_predefined_document_types
 load_dotenv()
 
 app = FastAPI()
@@ -70,6 +70,7 @@ try:
     connection = connection.server_info()
     print("Connected with database")
     create_admin_account()
+    create_predefined_document_types()
 except ConnectionFailure as error:
     print("Could not connect with database")
     print(error)

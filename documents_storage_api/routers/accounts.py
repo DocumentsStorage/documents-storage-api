@@ -4,7 +4,7 @@ from starlette.responses import JSONResponse
 from common.responses import Message, NotEnoughPermissions
 from middlewares.require_auth import UserChecker, PermissionsChecker, UserCheckerModel
 from models.account.api import CreateAccountModel, UpdateAccountModel
-from models.account.base import AccountModelDB
+from models.account.base import AccountModel
 from models.account.responses import AccountDeletionResponse, AccountNotFoundResponse, AccountUpdatedResponse
 from models.common import PydanticObjectId
 from services.hash_password import hash_password, verify_password
@@ -23,7 +23,7 @@ async def get_current_account(
 ):
     '''Get current session account data'''
     try:
-        account = loads(AccountModelDB.objects(id=user['client_id'])[0].to_json())
+        account = loads(AccountModel.objects(id=user['client_id'])[0].to_json())
         del account["_id"]
         del account["password"]
     except BaseException:
@@ -41,7 +41,7 @@ async def get_accounts_list(
     '''Get list of accounts, requires admin rank'''
     if PermissionsChecker("admin", user['rank']):
         accounts_list = loads(
-            AccountModelDB.objects()[
+            AccountModel.objects()[
                 skip:skip + limit].to_json())
         for dict in accounts_list:
             del dict["password"]
@@ -60,10 +60,10 @@ async def add_account(
     '''Add single account - requires admin rank'''
     if PermissionsChecker("admin", user['rank']):
         # Check if username is available
-        account_object = AccountModelDB.objects(username=account.username)
+        account_object = AccountModel.objects(username=account.username)
         password = hash_password(account.new_password)
         if not account_object:
-            account = AccountModelDB(
+            account = AccountModel(
                 username=account.username,
                 password=password,
                 rank=str(account.rank.value),
@@ -94,7 +94,7 @@ async def update_accont(
 
         # Check if username is available
         try:
-            usernames = AccountModelDB.objects(username=account.username)
+            usernames = AccountModel.objects(username=account.username)
             if usernames:
                 raise HTTPException(403, {"message": "Username is already taken"})
         except BaseException:
@@ -113,7 +113,7 @@ async def update_accont(
         # Get previous state of account
         try:
             account_from_db = loads(
-                AccountModelDB.objects(
+                AccountModel.objects(
                     id=account_id)[0].to_json())
         except BaseException:
             raise HTTPException(404, {"message": AccountNotFoundResponse().message})
@@ -146,7 +146,7 @@ async def update_accont(
         account_from_db.update(account_object)
 
         # Save in db
-        AccountModelDB.objects(id=account_id).update(
+        AccountModel.objects(id=account_id).update(
             username=account_from_db['username'],
             password=account_from_db['password'],
             rank=account_from_db['rank'],
@@ -165,7 +165,7 @@ async def delete_account(
 ):
     '''Delete single account'''
     if account_id == user['client_id'] or PermissionsChecker("admin", user['rank']):
-        count = AccountModelDB.objects(id=account_id).delete()
+        count = AccountModel.objects(id=account_id).delete()
         if count != 0:
             return {"message": AccountDeletionResponse().message}
         else:

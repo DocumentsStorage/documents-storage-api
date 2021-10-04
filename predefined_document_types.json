@@ -1,0 +1,50 @@
+[
+    {
+        "title": "Invoice",
+        "description": "Default invoice template",
+        "fields": [
+            {
+                "name": "Seller name",
+                "value_type": "text"
+            },
+            {
+                "name": "Buyer name",
+                "value_type": "text"
+            },
+            {
+                "name": "Date",
+                "value_type": "date"
+            },
+            {
+                "name": "Total amount",
+                "value_type": "number"
+            },
+            {
+                "name": "Amount currency",
+                "value_type": "text"
+            }
+        ]
+    },
+    {
+        "title": "Receipt",
+        "description": "Default receipt template",
+        "fields": [
+            {
+                "name": "Shop",
+                "value_type": "text"
+            },
+            {
+                "name": "Date",
+                "value_type": "date"
+            },
+            {
+                "name": "Total amount",
+                "value_type": "number"
+            },
+            {
+                "name": "Amount currency",
+                "value_type": "text"
+            }
+        ]
+    }
+]

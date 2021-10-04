@@ -40,7 +40,7 @@ class AccountModelAPI(BaseModel):
 
 # Mongoengine Models
 
-class AccountModelDB(Document):
+class AccountModel(Document):
     '''Account model for mongoengine'''
     meta = {"collection": "accounts"}
     username = StringField()
