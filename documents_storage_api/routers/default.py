@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.responses import JSONResponse
-from models.account.base import AccountModelDB
+from models.account.base import AccountModel
 from models.default.responses import CredentialsResponse, PingResponse, WrongCredentialsResponse
 from services.auth import jwt_authenticate
 from services.hash_password import verify_password
@@ -23,7 +23,7 @@ def ping():
                        "model": WrongCredentialsResponse}
              })
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    accounts_list = AccountModelDB.objects(username=form_data.username)
+    accounts_list = AccountModel.objects(username=form_data.username)
     if len(accounts_list) > 0:
         account = loads(accounts_list[0].to_json())
         if verify_password(account['password'], form_data.password):
