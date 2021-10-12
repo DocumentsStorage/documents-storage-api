@@ -7,6 +7,12 @@ from starlette.middleware.cors import CORSMiddleware
 from routers import default, accounts, document_types, documents, media, tags
 from mongoengine import connect, ConnectionFailure
 from services.initial_setup import create_admin_account, create_predefined_document_types
+from pathlib import Path
+from single_source import get_version
+
+path_to_pyproject_dir = Path(__file__).parent.parent
+__version__ = get_version(__name__, path_to_pyproject_dir, default_return=None)
+
 load_dotenv()
 
 app = FastAPI()
@@ -42,7 +48,7 @@ def custom_openapi():
     )
     openapi_schema["info"] = {
         "title": "Documents Storage API",
-        "version": "0.2.0",
+        "version": __version__,
         "description": "This is a OpenAPI documentation for Documents Storage API",
         "contact": {
             "name": "Github repository",

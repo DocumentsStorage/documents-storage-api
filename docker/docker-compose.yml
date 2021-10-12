@@ -10,7 +10,7 @@ services:
     volumes:
       - ${API_DIR}:/usr/src/app/documents-storage-api/data
     links:
-      - mongo
+      - mongo-ds
   documents-storage-ui:
     container_name: documents-storage-ui
     restart: always
@@ -19,9 +19,9 @@ services:
       - ${APP_PORT}:5000
     links:
       - documents-storage-api
-  mongo:
+  mongo-ds:
     container_name: documents-storage-db
-    hostname: mongo
+    hostname: mongo-ds
     restart: always
     image: mongo
     volumes:
