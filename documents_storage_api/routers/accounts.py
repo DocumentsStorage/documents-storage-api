@@ -120,9 +120,9 @@ async def update_accont(
 
         # Reset password - only admin
         if 'new_password' in account_object and PermissionsChecker("admin", user['rank']):
-            # Check if password is changed for admin account
+            # Check if admin is changing password for himself
             if str(account_id) == user['client_id']:
-                if verify_password(account_from_db['password'], account_object['new_password']):
+                if verify_password(account_from_db['password'], account_object['password']):
                     account_object["password"] = hash_password(account_object['new_password'])
                 else:
                     raise HTTPException(403, {"message": """While updating password for user with admin rank,
@@ -131,7 +131,7 @@ async def update_accont(
                 account_object["password"] = hash_password(account_object['new_password'])
         elif 'new_password' in account_object and 'password' in account_object:
             # Update password
-            if verify_password(account_from_db['password'], account_object['new_password']):
+            if verify_password(account_from_db['password'], account_object['password']):
                 account_object["password"] = hash_password(account_object['new_password'])
             else:
                 raise HTTPException(403, {"message": "Invalid old password"})
