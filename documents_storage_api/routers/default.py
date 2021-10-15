@@ -4,9 +4,10 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.responses import JSONResponse
 from models.account.base import AccountModel
-from models.default.responses import CredentialsResponse, PingResponse, WrongCredentialsResponse
-from services.auth import jwt_authenticate
+from models.default.responses import CredentialsResponse, PingResponse, WrongCredentialsResponse, WrongJWTResponse
+from services.auth import jwt_authenticate, jwt_authorize
 from services.hash_password import verify_password
+from middlewares.require_auth import oauth2_scheme
 
 router = APIRouter()
 
@@ -33,3 +34,19 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     account['rank']),
                 "token_type": "bearer"}
     raise HTTPException(403, {"message": WrongCredentialsResponse().message})
+
+
+@router.post("/token/update",
+             responses={
+                200: {"description": "Successfully updated token", "model": CredentialsResponse},
+                403: {"description": "Given wrong JWT token", "model": WrongJWTResponse}
+             })
+async def update_token(token: str = Depends(oauth2_scheme)):
+    jwt = jwt_authorize(token)
+    if jwt:
+        return {
+            "access_token": jwt_authenticate(
+                jwt['client_id'],
+                jwt['rank']),
+            "token_type": "bearer"}
+    raise HTTPException(403, {"message": WrongJWTResponse().message})
