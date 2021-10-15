@@ -13,3 +13,7 @@ class CredentialsResponse(BaseModel):
 
 class WrongCredentialsResponse(Message):
     message = "Check passed username or password"
+
+
+class WrongJWTResponse(Message):
+    message = "Check passed JWT token"
