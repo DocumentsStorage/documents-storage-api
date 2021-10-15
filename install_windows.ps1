@@ -16,7 +16,7 @@ APP_PORT=$APP_PORT" | Out-File -Encoding utf8 -FilePath .\documents-storage-api\
 # Update API .env
 "PYTHONPATH=documents_storage_api
 DEBUG=False
-DB_URL=mongodb://mongo:27017/documents-storage
+DB_URL=mongodb://mongo-ds:27017/documents-storage
 API_HOST=0.0.0.0
 API_PORT=$API_PORT
 API_ORIGINS=['*']
