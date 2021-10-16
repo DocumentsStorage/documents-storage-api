@@ -27,11 +27,12 @@ async def UserChecker(token: str = Depends(oauth2_scheme)):
     return decoded_token
 
 
-def PermissionsChecker(required_rank: RankEnum, user_rank: RankEnum):
+def PermissionsChecker(required_rank: RankEnum, user_rank: RankEnum, throwException=True):
     '''Check if given user_rank is higher in hierarchy than required_rank'''
     user_rank_index = RankEnum[required_rank]
     user_rank_index = ranks.index(user_rank)
     if user_rank_index <= ranks.index(required_rank):
         return True
     else:
-        raise HTTPException(403, "Not enough permission")
+        if throwException:
+            raise HTTPException(403, "Not enough permission")

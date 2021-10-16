@@ -88,8 +88,7 @@ async def update_accont(
         account_id: PydanticObjectId = Path(..., title="The ID of the account to update")
 ):
     '''Account can be updated by owner or user with admin rank'''
-    if account_id == user['client_id'] or PermissionsChecker(
-            "admin", user['rank']):
+    if str(account_id) == user['client_id'] or PermissionsChecker("admin", user['rank']):
         account_object = dict(account)
 
         # Check if username is available
@@ -106,8 +105,7 @@ async def update_accont(
             val in account_object.items() if val is not None}
 
         # Update rank - only admin
-        if 'rank' in account_object and PermissionsChecker(
-                "admin", user['rank']):
+        if 'rank' in account_object and PermissionsChecker("admin", user['rank']):
             account_object.update(rank=account.rank.value)
 
         # Get previous state of account
@@ -119,7 +117,7 @@ async def update_accont(
             raise HTTPException(404, {"message": AccountNotFoundResponse().message})
 
         # Reset password - only admin
-        if 'new_password' in account_object and PermissionsChecker("admin", user['rank']):
+        if 'new_password' in account_object and PermissionsChecker("admin", user['rank'], False):
             # Check if admin is changing password for himself
             if str(account_id) == user['client_id']:
                 if verify_password(account_from_db['password'], account_object['password']):
@@ -153,8 +151,7 @@ async def update_accont(
             new_account=False
         )
         return {"message": AccountUpdatedResponse().message}
-    else:
-        raise HTTPException(403, {"message": NotEnoughPermissions().message})
+    raise HTTPException(403, {"message": NotEnoughPermissions().message})
 
 
 @router.delete("/{account_id}",
