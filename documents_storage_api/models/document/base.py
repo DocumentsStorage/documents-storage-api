@@ -18,9 +18,6 @@ from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import EmbeddedDocumentListField, StringField
 
-from typing import Optional, List
-from pydantic import BaseModel, validator
-
 from models.common import PydanticObjectId, PydanticUUIDString
 from models.tag.base import TagModel
 
@@ -49,12 +46,6 @@ class DocumentModelAPI(BaseModel):
                 cls.__fields__[field].outer_type_ = Optional
                 cls.__fields__[field].required = False
 
-    @validator('title')
-    def title_has_to_have_one_char(cls, v):
-        if len(v) == 0:
-            raise ValueError('must contain at least one char')
-        return v
-
 
 # Mongoengine Models
 
@@ -71,7 +62,7 @@ class DocumentModel(Document):
     creation_date = DateTimeField()
     modification_date = DateTimeField()
     ngrams = ListField(StringField())
-    title = StringField(required=True)
+    title = StringField()
     description = StringField()
     tags = ListField(ReferenceField(TagModel, reverse_delete_rule=PULL))
     media_files = ListField(UUIDField())

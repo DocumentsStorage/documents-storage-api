@@ -3,6 +3,7 @@ from common.responses import Message
 
 class DocumentUpdatedResponse(Message):
     message = "Document successfully updated"
+    title = str
 
 
 class DocumentNotFoundResponse(Message):

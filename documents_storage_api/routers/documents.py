@@ -44,6 +44,25 @@ def createNgrams(all_fields: UpdateDocumentModel):
     return ngrams
 
 
+def createTitle(document, fields):
+    # Create document title basing on supplied fields or pushed title
+    if document.title is None or len(document.title) == 0:
+        title = ""
+        
+        # Search for first text field
+        for field in fields:
+            if type(field["value"]) is str:
+                title = " ".join(field["value"].split()[:3])
+                break
+        if len(document.description)>0 and len(title)==0:
+            title = " ".join(document.description.split()[:3])
+        elif len(title) == 0:
+            # Get first field as title
+            title = str(fields[0]["value"])
+    else:
+        title = document.title
+    return title
+
 # Documents
 
 
@@ -65,10 +84,12 @@ async def add_document(
 
     media_files = UUIDFromString(document.media_files) if document.media_files else []
 
+    title = createTitle(document, fields)
+    
     document_object = DocumentModel(
         ngrams=createNgrams(document),
         creation_date=datetime.now(),
-        title=document.title,
+        title=title,
         description=document.description,
         tags=document.tags,
         media_files=media_files,
@@ -76,7 +97,7 @@ async def add_document(
     )
     document = document_object.save()
     document_id = loads(document.to_json())["_id"]
-    return JSONResponse(status_code=201, content={"id": document_id})
+    return JSONResponse(status_code=201, content={"id": document_id, "title": title})
 
 
 @router.put("/{document_id}",
@@ -121,6 +142,8 @@ async def update_document(
             media_files = UUIDFromString(document.media_files)
         else:
             media_files = StringFromUUID(document_from_db['media_files'])
+        
+    document_object["title"] = createTitle(document, fields)
 
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
@@ -134,8 +157,7 @@ async def update_document(
         set__media_files=media_files,
         set__fields=fields
     )
-
-    return {"message": DocumentUpdatedResponse().message}
+    return {"message": DocumentUpdatedResponse().message, "title": document_object["title"]}
 
 
 @router.get("",
