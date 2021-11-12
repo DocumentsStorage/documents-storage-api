@@ -100,6 +100,39 @@ async def add_document(
     return JSONResponse(status_code=201, content={"id": document_id, "title": title})
 
 
+@router.get("",
+            responses={200: {"description": "Returns found documents"}, 404: {"model": DocumentNotFoundResponse}})
+async def search_documents(
+    skip: int = 0,
+    limit: int = 30,
+    search_text: List[str] = Query([""]),
+    order_by: List[str] = Query([""]),
+):
+    '''
+    Search documents by text, words with length higher or equal to 3 will be searched with ngrams,
+    other words (with length < 3) will be searched by regex (slower).
+    If there is only need to obtain documents without sorting/filtering dont use 'search_text' and 'order_by'.
+    '''
+    ngrams, other_words = [], ['']
+    for word in search_text:
+        ngrams.append(word) if len(word) > 2 else other_words.append(word)
+    last_word = other_words[len(other_words)-1].lower()
+    ngrams = list(map(lambda x: x.lower(), ngrams))
+
+    if len(ngrams) > 0:
+        query = (MQ(ngrams__in=ngrams))
+    else:
+        query = (MQ(ngrams__contains=last_word))
+
+    document_objects = DocumentModel.objects(query).only(*return_only_fields).order_by(*order_by)
+    total = len(document_objects)
+    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
+    if total > 0:
+        return JSONResponse(status_code=200, content={"total": total, "documents": documents_parsed})
+    else:
+        raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
+
+
 @router.put("/{document_id}",
             responses={200: {"model": DocumentUpdatedResponse},
                        404: {"model": DocumentNotFoundResponse}})
@@ -158,49 +191,6 @@ async def update_document(
         set__fields=fields
     )
     return {"message": DocumentUpdatedResponse().message, "title": document_object["title"]}
-
-
-@router.get("",
-            responses={200: {"description": "Successfully obtains list of documents"}})
-async def get_documents_list(
-    skip: int = 0,
-    limit: int = 30
-):
-    '''Get list of documents'''
-    document_objects = DocumentModel.objects().only(*return_only_fields)
-    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
-    return JSONResponse(status_code=200, content={"total": document_objects.count(), "documents": documents_parsed})
-
-
-@router.get("/search",
-            responses={200: {"description": "Returns found documents"}, 404: {"model": DocumentNotFoundResponse}})
-async def search_documents_by_text(
-    skip: int = 0,
-    limit: int = 30,
-    search_text: List[str] = Query(None)
-):
-    '''
-    Search documents by text, words with length higher or equal to 3 will be searched with ngrams,
-    other words (with length < 3) will be searched by regex (slower)
-    '''
-    ngrams, other_words = [], ['']
-    for word in search_text:
-        ngrams.append(word) if len(word) > 2 else other_words.append(word)
-    last_word = other_words[len(other_words)-1].lower()
-    ngrams = list(map(lambda x: x.lower(), ngrams))
-
-    if len(ngrams) > 0:
-        query = (MQ(ngrams__in=ngrams))
-    else:
-        query = (MQ(ngrams__contains=last_word))
-
-    document_objects = DocumentModel.objects(query).only(*return_only_fields)
-    total = len(document_objects)
-    documents_parsed = loads(document_objects[skip:skip + limit].to_json())
-    if total > 0:
-        return JSONResponse(status_code=200, content={"total": total, "documents": documents_parsed})
-    else:
-        raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
 
 
 @router.delete("/{document_id}",
