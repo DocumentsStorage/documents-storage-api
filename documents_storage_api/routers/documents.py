@@ -150,14 +150,12 @@ async def search_documents(
                 }
             }},
             {"$sort": {"order.value": order}},
-            {"$project": {"order": False, "ngrams": False}},
-            # skip and limit
-            {"$skip": skip},
-            {"$limit": limit},
+            {"$project": {"order": False, "ngrams": False}}
         ]
         cursor = DocumentModel.objects.aggregate(*pipeline)
-        document_objects = documents_parsed = list(map(lambda doc: dict(loads(DocumentModel._from_son(doc).to_json())), cursor))
+        document_objects = list(map(lambda doc: dict(loads(DocumentModel._from_son(doc).to_json())), cursor))
         total = len(document_objects)
+        documents_parsed = document_objects[skip:skip + limit]
     else:
         document_objects = DocumentModel.objects(query).only(
                                 *return_only_fields).order_by(("+" if order == 1 else "-")+order_by)
