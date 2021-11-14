@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 from mongoengine import Document
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
@@ -13,10 +14,6 @@ from mongoengine.fields import (
 from typing import Optional, List, Union
 from mongoengine.queryset.base import PULL
 from pydantic import BaseModel
-
-from mongoengine import Document
-from mongoengine.document import EmbeddedDocument
-from mongoengine.fields import EmbeddedDocumentListField, StringField
 
 from models.common import PydanticObjectId, PydanticUUIDString
 from models.tag.base import TagModel

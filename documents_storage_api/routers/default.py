@@ -38,8 +38,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.post("/token/update",
              responses={
-                200: {"description": "Successfully updated token", "model": CredentialsResponse},
-                403: {"description": "Given wrong JWT token", "model": WrongJWTResponse}
+                 200: {"description": "Successfully updated token", "model": CredentialsResponse},
+                 403: {"description": "Given wrong JWT token", "model": WrongJWTResponse}
              })
 async def update_token(token: str = Depends(oauth2_scheme)):
     jwt = jwt_authorize(token)
