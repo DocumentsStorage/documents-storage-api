@@ -133,23 +133,31 @@ async def search_documents(
     if order_by not in ['creation_date', 'modification_date']:
         pipeline = [
             {
-                "$match": {
-                    "$and": [
+                '$match': {
+                     "$and": [
                         ({"ngrams": {"$in": ngrams}} if len(ngrams) > 0 else {}),
-                        {"fields.name": order_by}
-                    ]
+                        {"fields.name": order_by}]
                 }
-            },
-            {"$addFields": {
-                "order": {
-                    "$filter": {
-                        "input": "$fields",
-                        "as": "field",
-                        "cond": {"field": {"name": order_by}}
+            }, {
+                '$addFields': {
+                    'order': {
+                        '$arrayElemAt': [
+                            {
+                                '$filter': {
+                                    'input': '$fields',
+                                    'as': 'field',
+                                    'cond': {
+                                        '$eq': [
+                                            '$$field.name', order_by
+                                        ]
+                                    }
+                                }
+                            }, 0
+                        ]
                     }
                 }
-            }},
-            {"$sort": {"order.value": order}},
+            },
+            {'$sort': {'order.value': order}},
             {"$project": {"order": False, "ngrams": False}}
         ]
         cursor = DocumentModel.objects.aggregate(*pipeline)
