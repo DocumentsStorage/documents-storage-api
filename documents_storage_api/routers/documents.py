@@ -140,8 +140,17 @@ async def search_documents(
                     ]
                 }
             },
-            {"$sort": {"fields.value": order}},
-            {"$unset": "ngrams"},
+            {"$addFields": {
+                "order": {
+                    "$filter": {
+                        "input": "$fields",
+                        "as": "field",
+                        "cond": {"field": {"name": order_by}}
+                    }
+                }
+            }},
+            {"$sort": {"order.value": order}},
+            {"$project": {"order": False, "ngrams": False}},
             # skip and limit
             {"$skip": skip},
             {"$limit": limit},
