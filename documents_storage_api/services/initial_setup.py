@@ -37,5 +37,5 @@ def create_predefined_document_types():
                 title=document_type['title'],
                 description=document_type['description'],
                 fields=fields
-                )
+            )
             document_type.save()
