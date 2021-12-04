@@ -48,4 +48,4 @@ class AccountModel(Document):
     password = StringField()
     rank = StringField()
     new_account = BooleanField()
-    notifications = ListField(StringField(), 5)
+    notifications = ListField(StringField())
