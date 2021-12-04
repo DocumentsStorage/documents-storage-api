@@ -5,7 +5,9 @@ from typing import List
 import uuid
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Query
-from models.common import  UUIDFromString, flat_map
+from starlette.responses import FileResponse
+from models.account.base import AccountModel
+from models.common import  PydanticObjectId, UUIDFromString, flat_map
 from middlewares.require_auth import UserChecker, UserCheckerModel
 from models.document.base import DocumentModel
 import tarfile
@@ -22,20 +24,23 @@ router = APIRouter(
     dependencies=[Depends(UserChecker)],
 )
 
-def build_archive(account_id_to_notify: str, media_files_ids: list):
+def build_archive(account_id_to_notify: PydanticObjectId, media_files_ids: list):
     try:
         pathlib.Path(TAR_FILE_PATHS).mkdir(parents=True, exist_ok=True)
     except Exception as e:
         print(e)
-    file = TAR_FILE_PATHS + str(uuid.uuid4()) + ".tar.gz"
-    with tarfile.open(file, "w:gz") as tar:
+    file_id = str(uuid.uuid4())
+    file_path = TAR_FILE_PATHS + file_id + ".tar.gz"
+    with tarfile.open(file_path, "w:gz") as tar:
         for entry in os.scandir(MEDIA_FILES_PATH):
             for id in media_files_ids:
                 if str(pathlib.Path(entry.name).with_suffix('')) == str(id):
                     tar.add(entry.path, arcname=str(pathlib.Path(entry.name)))
 
-    # TODO: Add notification through db 
-    
+    file_url = f'http://{os.getenv("API_HOST")}:{os.getenv("API_PORT")}/export/{file_id[:7]}'
+    notification = f'Archived file is available to be downloaded {file_url}'
+    AccountModel.objects(id=account_id_to_notify).update_one(add_to_set__notifications=notification)
+
 @router.post("",
              responses={
                  200: {"description": "Started creating archive"},
@@ -51,7 +56,6 @@ async def start_bulk_export(
     '''
     # Get documents
     if(ids is not None):
-        print("lmao")
         documents_from_db = loads(DocumentModel.objects(id__in=ids).to_json())
     else:
         documents_from_db = loads(DocumentModel.objects.to_json())
@@ -66,4 +70,19 @@ async def start_bulk_export(
 
     return Response(status_code=200)
 
-    # TODO: Add route that will allow to download archived file
+@router.post("/{file_id}",
+             responses={
+                 200: {"description": "Downloaded temporary file successfully"},
+             }
+             )
+async def download_bulk_export(
+    file_id: str = Query(None, description="Id of exported archive"),
+):
+    '''
+    Download exported documents (tar.gz file)
+    '''
+    for entry in os.scandir(TAR_FILE_PATHS):
+        if str(pathlib.Path(entry.name).with_suffix('')) == file_id+".tar":
+            return FileResponse(entry.path, filename=f'documents-storage-export-{file_id}.tar.gz', media_type='application/gzip')
+            
+    

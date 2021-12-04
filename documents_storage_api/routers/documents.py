@@ -200,7 +200,7 @@ async def update_document(
     document: UpdateDocumentModel,
     document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
 ):
-    '''This path allow to - update: title, description and overwrite: tags, fields, media_files'''
+    '''This path allow to overwrite: title, description, tags, fields, media_files'''
     document_object = dict(document)
 
     # Delete not passed properties
