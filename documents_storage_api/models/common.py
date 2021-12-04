@@ -31,4 +31,12 @@ class PydanticUUIDString(str):
 
 
 def UUIDFromString(uuid_list):
+    '''Parse UUID to dashed format'''
     return list(map(uuid.UUID, uuid_list))
+
+
+def flat_map(xs):
+    ys = []
+    for x in xs:
+        ys.extend(x)
+    return ys

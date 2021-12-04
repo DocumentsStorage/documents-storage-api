@@ -1,7 +1,7 @@
 
 from mongoengine.queryset.visitor import Q as MQ
 from datetime import datetime
-from json import load, loads
+from json import loads
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Path, Query
@@ -30,6 +30,7 @@ return_only_fields = list(map(lambda key: key, DocumentModelAPI.__fields__.keys(
 
 
 def StringFromUUID(media_files):
+    '''Get list of UUIDs from list'''
     return list(map(lambda file: str(file['$uuid']), media_files))
 
 
@@ -199,7 +200,7 @@ async def update_document(
     document: UpdateDocumentModel,
     document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
 ):
-    '''This path allow to - update: title, description and overwrite: tags, fields, media_files'''
+    '''This path allow to overwrite: title, description, tags, fields, media_files'''
     document_object = dict(document)
 
     # Delete not passed properties

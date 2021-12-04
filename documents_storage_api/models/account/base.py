@@ -1,7 +1,7 @@
 from mongoengine import Document
-from mongoengine.fields import BooleanField, StringField
+from mongoengine.fields import BooleanField, ListField, StringField
 
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, validator
 
 from middlewares.require_auth import RankEnum
@@ -17,6 +17,7 @@ class AccountModelAPI(BaseModel):
     password: str
     new_password: str
     rank: RankEnum
+    notifications: List[str]
 
     def __init_subclass__(cls, optional_fields=None, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -47,3 +48,4 @@ class AccountModel(Document):
     password = StringField()
     rank = StringField()
     new_account = BooleanField()
+    notifications = ListField(StringField())
