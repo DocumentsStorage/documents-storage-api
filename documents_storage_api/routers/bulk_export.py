@@ -10,7 +10,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Query
 from starlette.responses import FileResponse
-from models.account.base import AccountModel
+from models.account.base import AccountModel, NotificationModel
 from models.common import  PydanticObjectId, PydanticUUIDString, UUIDFromString, flat_map
 from middlewares.require_auth import PermissionsChecker, UserChecker, UserCheckerModel
 from models.document.base import DocumentModel
@@ -22,8 +22,7 @@ TAR_FILE_PATHS = os.getcwd() + "/data/temp/"
 
 router = APIRouter(
     prefix="/export",
-    tags=["export"],
-    dependencies=[Depends(UserChecker)],
+    tags=["export"]
 )
 
 def remove_archive_file(file_path):
@@ -73,8 +72,8 @@ def build_archive(
                         tar.add(entry.path, arcname=str(pathlib.Path(entry.name)))
 
     file_url = f'http://{os.getenv("API_HOST")}:{os.getenv("API_PORT")}/export/{file_id}'
-    notification = f'Archived files are available (until {datetime.now()+timedelta(hours=24)}) to be downloaded from: {file_url}'
-    AccountModel.objects(id=account_id_to_notify).update_one(add_to_set__notifications=notification)
+    notification_text = f'Archived files are available (until {datetime.now()+timedelta(hours=24)}) to be downloaded from: {file_url}'
+    AccountModel.objects(id=account_id_to_notify).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
     t1 = threading.Timer(60*60*24, remove_archive_file, [file_path])
     t1.start()
 
@@ -128,7 +127,7 @@ async def start_documents_export(
 
     return Response(status_code=200)
 
-@router.post("/{file_id}",
+@router.get("/{file_id}",
              responses={
                  200: {"description": "Downloaded archive successfully"},
              }
