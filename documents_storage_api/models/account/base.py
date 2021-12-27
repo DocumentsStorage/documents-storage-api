@@ -1,5 +1,7 @@
+import datetime
 from mongoengine import Document
-from mongoengine.fields import BooleanField, ListField, StringField
+from mongoengine.document import EmbeddedDocument
+from mongoengine.fields import BooleanField, DateTimeField, EmbeddedDocumentListField, StringField
 
 from typing import List, Optional
 from pydantic import BaseModel, validator
@@ -41,6 +43,11 @@ class AccountModelAPI(BaseModel):
 
 # Mongoengine Models
 
+class NotificationModel(EmbeddedDocument):
+    text = StringField()
+    creation_date = DateTimeField(default=datetime.datetime.now())
+    seen = BooleanField(default=False)
+
 class AccountModel(Document):
     '''Account model for mongoengine'''
     meta = {"collection": "accounts"}
@@ -48,4 +55,4 @@ class AccountModel(Document):
     password = StringField()
     rank = StringField()
     new_account = BooleanField()
-    notifications = ListField(StringField())
+    notifications = EmbeddedDocumentListField(NotificationModel)

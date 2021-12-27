@@ -31,6 +31,23 @@ async def get_current_account(
     return account
 
 
+@router.get("/session/notifications",
+            responses={200: {"description": "Successfully obtains notifications from session account"},
+                       404: {"model": AccountNotFoundResponse}})
+async def get_current_account(
+    skip: int = 0,
+    limit: int = 5,
+    user: UserCheckerModel = Depends(UserChecker)
+):
+    '''Get notifications from session account'''
+    try:
+        account = loads(AccountModel.objects(id=user['client_id'])[0].to_json())
+    except BaseException:
+        raise HTTPException(404, {"message": AccountNotFoundResponse().message})
+    AccountModel.objects(id=user['client_id']).update(**{'set__notifications__$[]__seen':True})
+    return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
+
+
 @router.get("/list",
             responses={200: {"description": "Successfully obtains list of accounts"}})
 async def get_accounts_list(
