@@ -22,8 +22,7 @@ TAR_FILE_PATHS = os.getcwd() + "/data/temp/"
 
 router = APIRouter(
     prefix="/export",
-    tags=["export"],
-    dependencies=[Depends(UserChecker)],
+    tags=["export"]
 )
 
 def remove_archive_file(file_path):
