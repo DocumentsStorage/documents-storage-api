@@ -23,7 +23,7 @@ async def get_current_account(
 ):
     '''Get current session account data'''
     try:
-        account = loads(AccountModel.objects(id=user['client_id'])[0].to_json())
+        account = loads(AccountModel.objects(_id=user['client_id'])[0].to_json())
         del account["_id"]
         del account["password"]
     except BaseException:
@@ -41,10 +41,10 @@ async def get_current_account(
 ):
     '''Get notifications from session account'''
     try:
-        account = loads(AccountModel.objects(id=user['client_id'])[0].to_json())
+        account = loads(AccountModel.objects(_id=user['client_id'])[0].to_json())
     except BaseException:
         raise HTTPException(404, {"message": AccountNotFoundResponse().message})
-    AccountModel.objects(id=user['client_id']).update(**{'set__notifications__$[]__seen':True})
+    AccountModel.objects(_id=user['client_id']).update(**{'set__notifications__$[]__seen':True})
     return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
 
 
@@ -129,7 +129,7 @@ async def update_accont(
         try:
             account_from_db = loads(
                 AccountModel.objects(
-                    id=account_id)[0].to_json())
+                    _id=account_id)[0].to_json())
         except BaseException:
             raise HTTPException(404, {"message": AccountNotFoundResponse().message})
 
@@ -161,7 +161,7 @@ async def update_accont(
         account_from_db.update(account_object)
 
         # Save in db
-        AccountModel.objects(id=account_id).update(
+        AccountModel.objects(_id=account_id).update(
             username=account_from_db['username'],
             password=account_from_db['password'],
             rank=account_from_db['rank'],
@@ -179,7 +179,7 @@ async def delete_account(
 ):
     '''Delete single account'''
     if account_id == user['client_id'] or PermissionsChecker("admin", user['rank']):
-        count = AccountModel.objects(id=account_id).delete()
+        count = AccountModel.objects(_id=account_id).delete()
         if count != 0:
             return {"message": AccountDeletionResponse().message}
         else:

@@ -1,5 +1,6 @@
 import datetime
 from mongoengine import Document
+from mongoengine.base.fields import BaseField
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import BooleanField, DateTimeField, EmbeddedDocumentListField, StringField
 
@@ -11,6 +12,12 @@ from models.common import PydanticObjectId
 
 # API Models
 
+
+class NotificationModelAPI(BaseModel):
+    '''Notification Base model'''
+    text: str
+    creation_date: datetime.datetime
+    seen: bool
 
 class AccountModelAPI(BaseModel):
     '''Account Base model'''
@@ -51,6 +58,7 @@ class NotificationModel(EmbeddedDocument):
 class AccountModel(Document):
     '''Account model for mongoengine'''
     meta = {"collection": "accounts"}
+    _id = BaseField(primary_key=True)
     username = StringField()
     password = StringField()
     rank = StringField()
