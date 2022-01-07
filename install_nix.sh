@@ -20,6 +20,7 @@ APP_PORT=$APP_PORT" > documents-storage-api/docker/.env
 printf "PYTHONPATH=documents_storage_api
 DEBUG=False
 DB_URL=mongodb://mongo-ds:27017/documents-storage
+HOST_IP=$API_HOST
 API_HOST=0.0.0.0
 API_PORT=$API_PORT
 API_ORIGINS=['*']

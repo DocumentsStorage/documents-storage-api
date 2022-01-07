@@ -1,5 +1,7 @@
 import datetime
+from bson.objectid import ObjectId
 from mongoengine import Document
+from mongoengine.base.fields import BaseField
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import BooleanField, DateTimeField, EmbeddedDocumentListField, StringField
 
@@ -12,9 +14,15 @@ from models.common import PydanticObjectId
 # API Models
 
 
+class NotificationModelAPI(BaseModel):
+    '''Notification Base model'''
+    text: str
+    creation_date: datetime.datetime
+    seen: bool
+
 class AccountModelAPI(BaseModel):
     '''Account Base model'''
-    id: PydanticObjectId
+    _id: PydanticObjectId
     username: str
     password: str
     new_password: str
@@ -51,6 +59,7 @@ class NotificationModel(EmbeddedDocument):
 class AccountModel(Document):
     '''Account model for mongoengine'''
     meta = {"collection": "accounts"}
+    _id = BaseField(primary_key=True, default=ObjectId())
     username = StringField()
     password = StringField()
     rank = StringField()

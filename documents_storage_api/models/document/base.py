@@ -1,6 +1,8 @@
 import datetime
 from enum import Enum
+from bson.objectid import ObjectId
 from mongoengine import Document
+from mongoengine.base.fields import BaseField
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
     DateTimeField,
@@ -29,7 +31,7 @@ class DocumentFieldModelAPI(BaseModel):
 
 class DocumentModelAPI(BaseModel):
     '''DocumentType Base model'''
-    id: PydanticObjectId
+    _id: PydanticObjectId
     title: str
     description: str
     tags: List[PydanticObjectId]
@@ -56,6 +58,7 @@ class DocumentFieldModel(EmbeddedDocument):
 class DocumentModel(Document):
     '''Document model for mongoengine'''
     meta = {"collection": "documents"}
+    _id = BaseField(primary_key=True, default=ObjectId())
     creation_date = DateTimeField()
     modification_date = DateTimeField()
     ngrams = ListField(StringField())

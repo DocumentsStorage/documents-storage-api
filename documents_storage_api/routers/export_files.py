@@ -4,6 +4,7 @@ import os
 import pathlib
 import uuid
 import tarfile
+from bson.objectid import ObjectId
 from json import dumps, loads
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -69,11 +70,11 @@ def build_archive(
             for entry in os.scandir(MEDIA_FILES_PATH):
                 for id in media_files_ids:
                     if str(pathlib.Path(entry.name).with_suffix('')) == str(id):
-                        tar.add(entry.path, arcname=str(pathlib.Path(entry.name)))
+                        tar.add(entry.path, arcname=str(pathlib.Path("media_files", str(pathlib.Path(entry.name)))))
 
-    file_url = f'http://{os.getenv("API_HOST")}:{os.getenv("API_PORT")}/export/{file_id}'
+    file_url = f'http://{os.getenv("HOST_IP")}:{os.getenv("API_PORT")}/export/{file_id}'
     notification_text = f'Archived files are available (until {datetime.now()+timedelta(hours=24)}) to be downloaded from: {file_url}'
-    AccountModel.objects(id=account_id_to_notify).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+    AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
     t1 = threading.Timer(60*60*24, remove_archive_file, [file_path])
     t1.start()
 
@@ -90,7 +91,6 @@ async def start_accounts_export(
     Export all accounts.
     '''
     if PermissionsChecker("admin", user['rank']):
-        build_archive(user['client_id'])
         t1 = threading.Thread(target=build_archive, kwargs={'account_id_to_notify': user['client_id'], 'accounts': True})
         t1.start()
         return Response(status_code=200)
