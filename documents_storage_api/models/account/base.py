@@ -1,4 +1,5 @@
 import datetime
+from bson.objectid import ObjectId
 from mongoengine import Document
 from mongoengine.base.fields import BaseField
 from mongoengine.document import EmbeddedDocument
@@ -21,7 +22,7 @@ class NotificationModelAPI(BaseModel):
 
 class AccountModelAPI(BaseModel):
     '''Account Base model'''
-    id: PydanticObjectId
+    _id: PydanticObjectId
     username: str
     password: str
     new_password: str
@@ -58,7 +59,7 @@ class NotificationModel(EmbeddedDocument):
 class AccountModel(Document):
     '''Account model for mongoengine'''
     meta = {"collection": "accounts"}
-    _id = BaseField(primary_key=True)
+    _id = BaseField(primary_key=True, default=ObjectId())
     username = StringField()
     password = StringField()
     rank = StringField()

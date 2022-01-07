@@ -1,4 +1,5 @@
 from json import loads
+from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Path
 from starlette.responses import JSONResponse
 from common.responses import Message, NotEnoughPermissions
@@ -23,10 +24,12 @@ async def get_current_account(
 ):
     '''Get current session account data'''
     try:
-        account = loads(AccountModel.objects(_id=user['client_id'])[0].to_json())
+        account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
+        print(account)
         del account["_id"]
         del account["password"]
-    except BaseException:
+    except BaseException as e:
+        print(e)
         raise HTTPException(404, {"message": AccountNotFoundResponse().message})
     return account
 
@@ -41,10 +44,10 @@ async def get_current_account(
 ):
     '''Get notifications from session account'''
     try:
-        account = loads(AccountModel.objects(_id=user['client_id'])[0].to_json())
+        account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
     except BaseException:
         raise HTTPException(404, {"message": AccountNotFoundResponse().message})
-    AccountModel.objects(_id=user['client_id']).update(**{'set__notifications__$[]__seen':True})
+    AccountModel.objects(_id=ObjectId(user['client_id'])).update(**{'set__notifications__$[]__seen':True})
     return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
 
 
@@ -128,8 +131,7 @@ async def update_accont(
         # Get previous state of account
         try:
             account_from_db = loads(
-                AccountModel.objects(
-                    _id=account_id)[0].to_json())
+                AccountModel.objects(_id=account_id)[0].to_json())
         except BaseException:
             raise HTTPException(404, {"message": AccountNotFoundResponse().message})
 

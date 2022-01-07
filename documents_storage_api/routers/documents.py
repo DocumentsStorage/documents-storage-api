@@ -211,8 +211,7 @@ async def update_document(
     # Get previous state of document
     try:
         document_from_db = loads(
-            DocumentModel.objects(
-                id=document_id)[0].to_json())
+            DocumentModel.objects(_id=document_id)[0].to_json())
     except BaseException:
         raise HTTPException(404, "Not found document")
 
@@ -241,7 +240,7 @@ async def update_document(
     # Update dict which will be uploaded to db
     document_from_db.update(document_object)
 
-    DocumentModel.objects(id=document_id).update(
+    DocumentModel.objects(_id=document_id).update(
         ngrams=createNgrams(document),
         modification_date=datetime.now(),
         title=document_from_db['title'],
@@ -259,7 +258,7 @@ async def delete_document(
     document_id: PydanticObjectId = Path(..., title="The ID of the document to update")
 ):
     '''Delete single document'''
-    document_object = DocumentModel.objects(id=document_id)
+    document_object = DocumentModel.objects(_id=document_id)
     document_json = loads(document_object.to_json())[0]
     if len(document_json['media_files']) > 0:
         await delete_media_files(StringFromUUID(document_json['media_files']))

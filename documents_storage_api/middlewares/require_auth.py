@@ -15,7 +15,7 @@ class RankEnum(Enum):
 
 
 class UserCheckerModel(BaseModel):
-    id: str
+    _id: str
     rank: RankEnum
 
 
