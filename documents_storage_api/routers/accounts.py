@@ -25,7 +25,6 @@ async def get_current_account(
     '''Get current session account data'''
     try:
         account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
-        print(account)
         del account["_id"]
         del account["password"]
     except BaseException as e:
