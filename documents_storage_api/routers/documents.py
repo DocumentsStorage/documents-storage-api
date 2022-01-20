@@ -1,4 +1,5 @@
-
+from difflib import get_close_matches
+from enum import Enum
 from mongoengine.queryset.visitor import Q as MQ
 from datetime import datetime
 from json import loads
@@ -69,6 +70,10 @@ def createTitle(document, fields):
         title = document.title
     return title
 
+
+class ResponseTypeEnum(str, Enum):
+    search = 'search'
+    field  = 'field'
 # Documents
 
 
@@ -112,7 +117,7 @@ async def search_documents(
     skip: int = 0,
     limit: int = 30,
     search_text: List[str] = Query([""]),
-    order_by: str = "",
+    order_by: str = "creation_date",
     order: int = 1
 ):
     '''
@@ -183,16 +188,39 @@ async def search_documents(
     defined_fields_list = [x[0] for x in sorted(defined_fields.items(), key=lambda x: x[1], reverse=True) if (x[1] > 1)]
 
     if total > 0:
-        return JSONResponse(
-            status_code=200,
-            content={
+        return {
                 "total": total,
                 "documents": documents_parsed,
                 "defined_fields": defined_fields_list
-                })
+                }
     else:
         raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
 
+@router.get("/autofill",
+            responses={200: {"model": DocumentsSearchResponse}, 404: {"model": DocumentNotFoundResponse}})
+async def autofill(
+    search_text: str = Query(..., min_length=1),
+    max_autofill: int = 2,
+    results_for: ResponseTypeEnum = ResponseTypeEnum.search
+    ):
+    documents = await search_documents(search_text=[search_text])
+    if len(documents["documents"]) > 0:
+        text_data = []
+        if results_for == ResponseTypeEnum.search:
+            for document in documents["documents"]:
+                print(document["title"])
+                for field in document["fields"]:
+                    text_data.append(field["value"])
+                text_data.append(document["title"])
+                text_data.append(document["description"])
+        elif results_for == ResponseTypeEnum.field:
+            for document in documents["documents"]:
+                for field in document["fields"]:
+                    text_data.append(field["value"])
+        text_data = [s for s in text_data if type(s) is str]
+        print(text_data)
+        return {"autofill": get_close_matches(search_text, list(map(str.lower, text_data)), max_autofill, 0)}
+            
 
 @router.put("/{document_id}",
             responses={200: {"model": DocumentUpdatedResponse},
