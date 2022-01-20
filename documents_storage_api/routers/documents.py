@@ -218,8 +218,7 @@ async def autofill(
                 for field in document["fields"]:
                     text_data.append(field["value"])
         text_data = [s for s in text_data if type(s) is str]
-        print(text_data)
-        return {"autofill": get_close_matches(search_text, list(map(str.lower, text_data)), max_autofill, 0)}
+        return {"autofill": get_close_matches(search_text, list(set(map(str.lower, text_data))), max_autofill, 0)}
             
 
 @router.put("/{document_id}",
