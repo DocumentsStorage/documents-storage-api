@@ -17,7 +17,7 @@ from models.document.responses import (
     DocumentsSearchResponse
 )
 from routers.media import delete_media_files
-from services.ngram import create_ngram
+from services.ngram import create_ngram, filter_text
 
 router = APIRouter(
     prefix="/documents",
@@ -124,7 +124,8 @@ async def search_documents(
     for word in search_text:
         ngrams.append(word) if len(word) > 2 else other_words.append(word)
     last_word = other_words[len(other_words) - 1].lower()
-    ngrams = list(map(lambda x: x.lower(), ngrams))
+
+    ngrams = list(map(lambda x: filter_text(x.lower()), ngrams))
 
     if len(ngrams) > 0:
         query = (MQ(ngrams__in=ngrams))

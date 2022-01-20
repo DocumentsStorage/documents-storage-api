@@ -67,3 +67,8 @@ Testing
 #. Make sure you have installed API with steps listed before.
 #. While tesiting export path for API files ``export PYTHONPATH=documents_storage_api``
 #. Run command with poetry : ``poetry shell`` and run ``pytest``; or without poetry just run ``pytest``
+
+==============
+Special Thanks
+==============
+Replace_non_ascii.py - https://gist.github.com/AdoHaha/a76157c6de5155bf6b0adc77988724d9
