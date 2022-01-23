@@ -208,7 +208,6 @@ async def autofill(
         text_data = []
         if results_for == ResponseTypeEnum.search:
             for document in documents["documents"]:
-                print(document["title"])
                 for field in document["fields"]:
                     text_data.append(field["value"])
                 text_data.append(document["title"])
@@ -217,8 +216,8 @@ async def autofill(
             for document in documents["documents"]:
                 for field in document["fields"]:
                     text_data.append(field["value"])
-        text_data = [s for s in text_data if type(s) is str]
-        return {"autofill": get_close_matches(search_text, list(set(map(str.lower, text_data))), max_autofill, 0)}
+        text_data = [s for s in text_data if type(s) is str and len(s) > 0]
+        return {"autofill": get_close_matches(search_text, list(set(map(str.lower, text_data))), max_autofill, 0.1)}
             
 
 @router.put("/{document_id}",
