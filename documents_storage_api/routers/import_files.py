@@ -44,7 +44,7 @@ def create_document_field_object(document_field_obj):
         value=document_field_obj['value']
     )
 
-def create_document_object(document_obj):
+def create_document_object_mongo(document_obj):
     document = DocumentModel(
         _id=BsonObjectId(document_obj['_id']['$oid']),
         creation_date = datetime.fromtimestamp(document_obj['creation_date']['$date'] / 1000),
@@ -59,21 +59,21 @@ def create_document_object(document_obj):
         document.modification_date = datetime.fromtimestamp(document_obj['modification_date']['$date'] / 1000)
     return document
 
-def create_notification_object(notification_obj: NotificationModelAPI):
+def create_notification_object_mongo(notification_obj: NotificationModelAPI):
     return NotificationModel(
         text=notification_obj['text'],
         creation_date=datetime.fromtimestamp(notification_obj['creation_date']['$date'] / 1000),
         seen=notification_obj['seen']
     )
 
-def create_account_object(account_obj: AccountModelAPI):
+def create_account_object_mongo(account_obj: AccountModelAPI):
     return AccountModel(
                     _id=BsonObjectId(account_obj['_id']['$oid']),
                     username=account_obj['username'],
                     password=account_obj['password'],
                     rank=account_obj['rank'],
                     new_account=account_obj['new_account'],
-                    notifications=[create_notification_object(notification) for notification in account_obj['notifications']]
+                    notifications=[create_notification_object_mongo(notification) for notification in account_obj['notifications']]
                 )
 
 
@@ -81,10 +81,11 @@ def create_account_object(account_obj: AccountModelAPI):
 @router.post("/documents", responses={
     200: {"description": "Successfully imported data"},
 })
-async def import_media_file(
+async def import_documents(
     archive_file: UploadFile = File(...),
     import_documents: bool = True,
     import_images: bool = True,
+    import_overwrite: bool = False,
 ):
     '''
     Upload documents with media files
@@ -95,13 +96,29 @@ async def import_media_file(
     if import_documents:
         with open(pathlib.Path(EXTRACTED_TAR_FILE_PATH, "documents.json"), "r") as documents_file:
             documents = load(documents_file)
-            documents_to_save = [create_document_object(document) for document in documents]
             try:
-                DocumentModel.objects.insert(documents_to_save)
-            except BulkWriteError as bulkErr:
-                print(bulkErr)
-                shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-                return Response(status_code=422)
+                if(import_overwrite):
+                    try:
+                        for doc in documents:
+                            DocumentModel.objects(_id=doc['_id']['$oid']).update(__raw__={'$set': {
+                                    'creation_date': datetime.fromtimestamp(doc['creation_date']['$date'] / 1000),
+                                    'ngrams': doc['ngrams'],
+                                    'title': doc['title'],
+                                    'description': doc['description'],
+                                    'tags': doc['tags'],
+                                    'media_files': [UUIDFromString([uuid_string['$uuid']])[0] for uuid_string in doc['media_files']],
+                                    'fields': doc['fields']
+                            }}, upsert=True)
+                    except Exception as ex:
+                        shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
+                else:
+                    try:
+                        documents_to_save = [create_document_object_mongo(document) for document in documents]
+                        DocumentModel.objects.insert(documents_to_save)
+                    except BulkWriteError as bulkErr:
+                        print(bulkErr)
+                        shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
+                        return Response(status_code=422)
             except Exception as e:
                 print(e)
                 shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
@@ -115,7 +132,7 @@ async def import_media_file(
 @router.post("/accounts", responses={
     200: {"description": "Successfully imported data"},
 })
-async def import_media_file(
+async def import_account(
     archive_file: UploadFile = File(...),
     user: UserCheckerModel = Depends(UserChecker)
 ):
@@ -127,7 +144,7 @@ async def import_media_file(
     if PermissionsChecker("admin", user['rank']):
         with open(pathlib.Path(EXTRACTED_TAR_FILE_PATH, "accounts.json"), "r") as accounts_file:
             accounts = load(accounts_file)
-            accounts_to_save = [create_account_object(account) for account in accounts]
+            accounts_to_save = [create_account_object_mongo(account) for account in accounts]
             try:
                 AccountModel.objects.insert(accounts_to_save)
             except BulkWriteError as bulkErr:
