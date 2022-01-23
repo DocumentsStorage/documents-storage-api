@@ -1,10 +1,9 @@
 import datetime
-from enum import Enum
 from bson.objectid import ObjectId
 from mongoengine import Document
-from mongoengine.base.fields import BaseField
 from mongoengine.document import EmbeddedDocument
 from mongoengine.fields import (
+    ObjectIdField,
     DateTimeField,
     DynamicField,
     EmbeddedDocumentListField,
@@ -58,7 +57,7 @@ class DocumentFieldModel(EmbeddedDocument):
 class DocumentModel(Document):
     '''Document model for mongoengine'''
     meta = {"collection": "documents"}
-    _id = BaseField(primary_key=True, default=ObjectId())
+    _id = ObjectIdField(primary_key=True)
     creation_date = DateTimeField()
     modification_date = DateTimeField()
     ngrams = ListField(StringField())

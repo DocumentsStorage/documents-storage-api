@@ -1,5 +1,6 @@
 from difflib import get_close_matches
 from enum import Enum
+from bson.objectid import ObjectId
 from mongoengine.queryset.visitor import Q as MQ
 from datetime import datetime
 from json import loads
@@ -36,9 +37,8 @@ def StringFromUUID(media_files):
 
 
 def createNgrams(all_fields: UpdateDocumentModel):
-    ngrams = []
-    if all_fields.title:
-        ngrams += create_ngram(all_fields.title)
+    ngrams = [filter_text(all_fields.title.lower())]
+    ngrams += create_ngram(all_fields.title)
     if all_fields.description:
         ngrams += create_ngram(all_fields.description)
     if all_fields.fields:
@@ -97,7 +97,9 @@ async def add_document(
 
     title = createTitle(document, fields)
 
+    new_id = ObjectId()
     document_object = DocumentModel(
+        _id=new_id,
         ngrams=createNgrams(document),
         creation_date=datetime.now(),
         title=title,
