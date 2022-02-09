@@ -46,7 +46,7 @@ async def get_current_account(
         account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
     except BaseException:
         raise HTTPException(404, {"message": AccountNotFoundResponse().message})
-    AccountModel.objects(_id=ObjectId(user['client_id'])).update(**{'set__notifications__$[]__seen':True})
+    AccountModel.objects(_id=ObjectId(user['client_id'])).order_by("-creation_date").update(**{'set__notifications__$[]__seen':True})
     return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
 
 

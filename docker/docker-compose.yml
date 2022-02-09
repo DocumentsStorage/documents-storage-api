@@ -3,7 +3,9 @@ services:
   documents-storage-api:
     container_name: documents-storage-api
     restart: always
-    build: ../
+    build:
+      context: ../
+      dockerfile: start.dockerfile
     hostname: documents-storage-api
     ports:
       - ${API_PORT}:${API_PORT}
