@@ -10,8 +10,8 @@ def test_document_type_add(get_authorization_header):
         "/document_types",
         headers={"Content-Type": "application/json", **get_authorization_header},
         json={
-            "title": "Invoice",
-            "description": "Invoice document",
+            "title": "InvoiceTest",
+            "description": "Invoice documentTest",
             "fields": [
                 {
                     "name": "Seller name",

@@ -33,12 +33,9 @@ def test_document_add(get_authorization_header):
 
 
 def test_document_list(get_authorization_header):
-    response = client.get(
-        "/documents?skip=0&limit=1",
-        headers={"Content-Type": "application/json", **get_authorization_header},
-    )
+    response = client.get("/documents",headers={"Content-Type": "application/json", **get_authorization_header})
     assert response.status_code == 200
-    document_type = response.json()[0]
+    document_type = response.json()['documents'][0]
     for field in ['_id', 'title', 'description', 'fields', 'media_files']:
         assert field in document_type
     return document_type
@@ -52,6 +49,7 @@ def test_document_update(get_authorization_header):
         json={
             "title": "NewTitle",
             "description": "NewDescription",
+            "tags": [],
             "fields": [
                 {
                     "name": "OnlyFieldName",
@@ -61,7 +59,7 @@ def test_document_update(get_authorization_header):
         }
     )
     assert response.status_code == 200
-    assert response.json() == {"message": "Document successfully updated"}
+    assert response.json() == {"message": "Document successfully updated", 'title': 'NewTitle'}
 
 
 def test_document_delete(get_authorization_header):

@@ -12,9 +12,12 @@ password = "documents-storage-supervisor"
 def get_authorization_header():
     response = client.post(
         "/token",
-        headers={
-            "Content-Type": "application/x-www-form-urlencoded"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
         data=f'username={username}&password={password}')
+    print(response.json())
     assert response.status_code == 200
     res = response.json()
-    return {"Authorization": res['token_type'] + " " + res['access_token']}
+    if 'token_type' in res:
+        return {"Authorization": res['token_type'] + " " + res['access_token']}
+    else:
+        return {"Authorization": res['access_token']}
