@@ -17,7 +17,7 @@ jobs:
         python-version: 3.7
     - name: Generate Report
       run: |
-        pip install ./requirements.txt
+        pip install -r ./requirements.txt
         pip install coverage
         export PYTHONPATH=documents_storage_api
         coverage run --source routers -m pytest
