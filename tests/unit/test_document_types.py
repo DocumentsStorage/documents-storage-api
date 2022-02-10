@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from documents_storage_api.main import app
+from bson.objectid import ObjectId as BsonObjectId
 import pytest
 
 client = TestClient(app)
@@ -38,6 +39,39 @@ def test_document_type_add(get_authorization_header):
     )
     assert response.status_code == 201
 
+def test_bad_duplicated_document_type_add(get_authorization_header):
+    response = client.post(
+        "/document_types",
+        headers={"Content-Type": "application/json", **get_authorization_header},
+        json={
+            "title": "InvoiceTest",
+            "description": "Invoice documentTest",
+            "fields": [
+                {
+                    "name": "Seller name",
+                    "value_type": "text"
+                },
+                {
+                    "name": "Buyer name",
+                    "value_type": "text"
+                },
+                {
+                    "name": "Date",
+                    "value_type": "date"
+                },
+                {
+                    "name": "Total amount",
+                    "value_type": "number"
+                },
+                {
+                    "name": "Amount currency",
+                    "value_type": "text"
+                }
+            ]
+        }
+    )
+    assert response.status_code == 403
+
 
 def test_document_type_list(get_authorization_header):
     response = client.get(
@@ -70,6 +104,23 @@ def test_document_type_update(get_authorization_header):
     assert response.status_code == 200
     assert response.json() == {"message": "Document type successfully updated"}
 
+def test_bad_document_type_update(get_authorization_header):
+    response = client.put(
+        f'/document_types/{BsonObjectId()}',
+        headers={"Content-Type": "application/json", **get_authorization_header},
+        json={
+            "title": "NewTitle",
+            "description": "NewDescription",
+            "fields": [
+                {
+                    "name": "OnlyFieldName",
+                    "value_type": "text"
+                }
+            ]
+        }
+    )
+    assert response.status_code == 404
+
 
 def test_document_type_delete(get_authorization_header):
     document_type_id = test_document_type_list(get_authorization_header)['_id']['$oid']
@@ -79,3 +130,10 @@ def test_document_type_delete(get_authorization_header):
     )
     assert response.status_code == 200
     assert response.json() == {"message": "Document type successfully deleted"}
+
+def test_bad_document_type_delete(get_authorization_header):
+    response = client.delete(
+        f'/document_types/{BsonObjectId()}',
+        headers={"Content-Type": "application/json", **get_authorization_header},
+    )
+    assert response.status_code == 404
