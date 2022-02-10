@@ -38,10 +38,7 @@ async def get_single_media_file(media_id: PydanticUUIDString):
 async def add_media_files(
     media_files: List[UploadFile] = File(...)
 ):
-    try:
-        pathlib.Path(MEDIA_FILES_PATH).mkdir(parents=True, exist_ok=True)
-    except Exception as e:
-        print(e)
+    pathlib.Path(MEDIA_FILES_PATH).mkdir(parents=True, exist_ok=True)
 
     media_files_ids = []
     for media_file in media_files:
@@ -73,4 +70,4 @@ async def delete_media_files(
     if len(media_files_ids) == 0:
         return JSONResponse(status_code=200, content={"message": MediaDeletionResponse().message})
     else:
-        return {"message": 'Not found media files: {media_files_ids}'}
+        return JSONResponse(status_code=404, content={"message": 'Not found media files: {media_files_ids}'})
