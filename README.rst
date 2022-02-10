@@ -1,3 +1,11 @@
+--------------------
+DocumentsStorage API
+--------------------
+
+.. image:: https://codecov.io/gh/DocumentsStorage/documents-storage-api/branch/master/graph/badge.svg?token=7PH4PIYS54
+    :target: https://codecov.io/gh/DocumentsStorage/documents-storage-api
+    
+
 ==============
 How to install
 ==============

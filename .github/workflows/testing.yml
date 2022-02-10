@@ -1,0 +1,43 @@
+name: CodeCov
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.9'
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: ‘2’
+
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.7
+
+    - name: Setup MongoDB
+      uses: supercharge/mongodb-github-action@1.7.0
+
+    - name: Generate Report
+      run: |
+        pip install -r ./requirements.txt
+        pip install coverage
+        pip install pytest
+        export PYTHONPATH=documents_storage_api
+        printf "PYTHONPATH=documents_storage_api \n \
+        DEBUG=True \n \
+        DB_URL=mongodb://127.0.0.1:27017/documents-storage \n \
+        HOST_IP=127.0.0.1 \n \
+        API_HOST=127.0.0.1 \n \
+        API_PORT=8000 \n \
+        API_ORIGINS=['http://localhost:5000', 'http://localhost:8000'] \n \
+        API_JWT_SECRET='test_secret'" > .env
+        coverage run --source routers -m pytest
+        coverage xml
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        files: coverage.xml
+        fail_ci_if_error: true
+        verbose: true
