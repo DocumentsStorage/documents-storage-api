@@ -33,8 +33,8 @@ jobs:
         API_PORT=8000 \n \
         API_ORIGINS=['http://localhost:5000', 'http://localhost:8000'] \n \
         API_JWT_SECRET='test_secret'" > .env
-        coverage run --source routers -m pytest
+        coverage xml run --source routers -m pytest
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
-        files: ./tests/coverage.xml
+        files: coverage.xml
