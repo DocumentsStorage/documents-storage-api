@@ -247,10 +247,7 @@ def test_document_update_with_empty_media(get_authorization_header):
 
 def test_document_delete(get_authorization_header):
     document_id = test_document_search(get_authorization_header)['_id']['$oid']
-    response = client.delete(
-        f'/documents/{document_id}',
-        headers={"Content-Type": "application/json", **get_authorization_header},
-    )
+    response = client.delete(f'/documents/{document_id}', headers={**get_authorization_header})
     assert response.status_code == 200
     assert response.json() == {"message": "Document successfully deleted"}
 

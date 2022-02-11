@@ -16,9 +16,7 @@ from models.common import  PydanticObjectId, PydanticUUIDString, UUIDFromString,
 from middlewares.require_auth import PermissionsChecker, UserChecker, UserCheckerModel
 from models.document.base import DocumentModel
 from routers.documents import StringFromUUID
-
-MEDIA_FILES_PATH = os.getcwd() + "/data/media_files/"
-TAR_FILE_PATHS = os.getcwd() + "/data/temp/"
+from services.paths import MEDIA_FILES_PATH, TEMP_PATH
 
 
 router = APIRouter(
@@ -42,12 +40,12 @@ def build_archive(
     media_files_ids: Optional[list]=None
 ):
     try:
-        pathlib.Path(TAR_FILE_PATHS).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(TEMP_PATH).mkdir(parents=True, exist_ok=True)
     except Exception as e:
         print(e)
     
     file_id = str(uuid.uuid4())
-    file_path = TAR_FILE_PATHS + file_id + ".tar.gz"
+    file_path = pathlib.Path(TEMP_PATH, f"{file_id}.tar.gz")
     with tarfile.open(file_path, "w:gz") as tar:
         # Accounts file
         if accounts:
@@ -138,7 +136,7 @@ async def download_export(
     '''
     Download exported documents (tar.gz file)
     '''
-    for entry in os.scandir(TAR_FILE_PATHS):
+    for entry in os.scandir(TEMP_PATH):
         if str(pathlib.Path(entry.name).with_suffix('')) == file_id+".tar":
             created = os.stat(entry.path).st_ctime
             date = datetime.fromtimestamp(created).strftime("%x-%H_%M")

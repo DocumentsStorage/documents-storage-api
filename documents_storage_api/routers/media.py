@@ -9,8 +9,8 @@ from starlette.responses import JSONResponse
 from middlewares.require_auth import UserChecker
 from models.common import PydanticUUIDString, UUIDFromString
 from models.media.responses import MediaDeletionResponse, MediaNotFoundResponse
+from services.paths import MEDIA_FILES_PATH
 
-MEDIA_FILES_PATH = os.getcwd() + "/data/media_files/"
 
 router = APIRouter(
     prefix="/media",
@@ -28,7 +28,7 @@ async def get_single_media_file(media_id: PydanticUUIDString):
     media_id = UUIDFromString([media_id])[0]
     for entry in os.scandir(MEDIA_FILES_PATH):
         if str(pathlib.Path(entry.name).with_suffix('')) == str(media_id):
-            return FileResponse(MEDIA_FILES_PATH + entry.name)
+            return FileResponse(pathlib.Path(MEDIA_FILES_PATH, entry.name))
     raise HTTPException(404, {"message": MediaNotFoundResponse().message})
 
 
@@ -44,7 +44,7 @@ async def add_media_files(
     for media_file in media_files:
         media_file_id = uuid.uuid4()
         file_extension = pathlib.Path(media_file.filename).suffix
-        file_name = MEDIA_FILES_PATH + str(media_file_id) + file_extension
+        file_name =  pathlib.Path(MEDIA_FILES_PATH, f"{str(media_file_id)}{file_extension}")
         with open(file_name, 'wb+') as f:
             f.write(media_file.file.read())
             f.close()

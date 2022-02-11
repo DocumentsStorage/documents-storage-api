@@ -15,10 +15,8 @@ from models.account.base import AccountModel, AccountModelAPI, NotificationModel
 from middlewares.require_auth import PermissionsChecker, UserChecker, UserCheckerModel
 from models.common import PydanticObjectId, UUIDFromString
 from models.document.base import DocumentFieldModel, DocumentModel
+from services.paths import MEDIA_FILES_PATH, TEMP_PATH
 
-
-MEDIA_FILES_PATH = os.getcwd() + "/data/media_files/"
-TEMP_PATH = os.getcwd() + "/data/temp/"
 EXTRACTED_TAR_FILE_PATH = pathlib.Path(TEMP_PATH, "import")
 
 
