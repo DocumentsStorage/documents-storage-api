@@ -7,12 +7,12 @@ from bson.objectid import ObjectId as BsonObjectId
 client = TestClient(app)
 
 
-def test_document_add(get_authorization_header):
+def test_document_add(get_authorization_header, tag_name="tag1"):
     response = client.post(
         "/tags",
         headers={"Content-Type": "application/json", **get_authorization_header},
         json={
-            "name": "tagExample1"
+            "name": tag_name
         }
     )
     tag_id = response.json()['id']['$oid']
@@ -41,6 +41,7 @@ def test_document_add(get_authorization_header):
         }
     )
     assert response.status_code == 201
+    return response.json()
 
 def test_document_add_with_empty_title_and_no_text(get_authorization_header):
     response = client.post(
@@ -185,45 +186,6 @@ def test_document_update(get_authorization_header):
     assert response.status_code == 200
     assert response.json() == {"message": "Document successfully updated", 'title': 'NewTitle'}
 
-
-
-def test_bad_document_update(get_authorization_header):
-    response = client.put(
-        f'/documents/{BsonObjectId()}',
-        headers={"Content-Type": "application/json", **get_authorization_header},
-        json={
-            "title": "NewTitle",
-            "description": "NewDescription",
-            "tags": [],
-            "fields": [
-                {
-                    "name": "OnlyFieldName",
-                    "value_type": "text"
-                }
-            ]
-        }
-    )
-    assert response.status_code == 404
-
-def test_document_update_without_media(get_authorization_header):
-    document_id = test_document_search(get_authorization_header)['_id']['$oid']
-    response = client.put(
-        f'/documents/{document_id}',
-        headers={"Content-Type": "application/json", **get_authorization_header},
-        json={
-            "title": "NewTitle",
-            "description": "NewDescription",
-            "fields": [
-                {
-                    "name": "OnlyFieldName",
-                    "value_type": "text"
-                }
-            ]
-        }
-    )
-    assert response.status_code == 200
-    assert response.json() == {"message": "Document successfully updated", 'title': 'NewTitle'}
-
 def test_document_update_with_empty_media(get_authorization_header):
     document_id = test_document_search(get_authorization_header)['_id']['$oid']
     response = client.put(
@@ -231,7 +193,6 @@ def test_document_update_with_empty_media(get_authorization_header):
         headers={"Content-Type": "application/json", **get_authorization_header},
         json={
             "title": "NewTitle",
-            "description": "NewDescription",
             "fields": [
                 {
                     "name": "OnlyFieldName",
@@ -245,8 +206,47 @@ def test_document_update_with_empty_media(get_authorization_header):
     assert response.json() == {"message": "Document successfully updated", 'title': 'NewTitle'}
 
 
-def test_document_delete(get_authorization_header):
+def test_document_update_without_media(get_authorization_header):
     document_id = test_document_search(get_authorization_header)['_id']['$oid']
+    response = client.put(
+        f'/documents/{document_id}',
+        headers={"Content-Type": "application/json", **get_authorization_header},
+        json={
+            "title": "NewTitle",
+            "fields": [
+                {
+                    "name": "OnlyFieldName",
+                    "value_type": "text"
+                }
+            ]
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {"message": "Document successfully updated", 'title': 'NewTitle'}
+
+
+def test_bad_document_update_not_existing(get_authorization_header):
+    response = client.put(
+        f'/documents/{BsonObjectId()}',
+        headers={"Content-Type": "application/json", **get_authorization_header},
+        json={
+            "title": "NewTitle",
+            "description": "NewDescription",
+            "tags": [],
+            "fields": [
+                {
+                    "name": "OnlyFieldName",
+                    "value_type": "text"
+                }
+            ],
+            "media_files": []
+        }
+    )
+    assert response.status_code == 404
+
+
+def test_document_delete(get_authorization_header):
+    document_id = test_document_add(get_authorization_header, "tag2")['id']['$oid']
     response = client.delete(f'/documents/{document_id}', headers={**get_authorization_header})
     assert response.status_code == 200
     assert response.json() == {"message": "Document successfully deleted"}

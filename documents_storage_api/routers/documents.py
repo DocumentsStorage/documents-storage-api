@@ -255,9 +255,12 @@ async def update_document(
             "value": field.value
         })
 
-    media_files = []
+
     if document.media_files:
-        media_files = UUIDFromString(document.media_files)
+        if len(document.media_files) == 0:
+            media_files = []
+        else:
+            media_files = UUIDFromString(document.media_files)
     else:
         media_files = StringFromUUID(document_from_db['media_files'])
 
@@ -288,10 +291,7 @@ async def delete_document(
     if document_object:
         document_json = loads(document_object.to_json())[0]
         if len(document_json['media_files']) > 0:
-            try:
-                await delete_media_files(StringFromUUID(document_json['media_files']))
-            except Exception as e:
-                print(e)
+            await delete_media_files(StringFromUUID(document_json['media_files']))
         count = document_object.delete()
         if count != 0:
             return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})
