@@ -291,7 +291,10 @@ async def delete_document(
     if document_object:
         document_json = loads(document_object.to_json())[0]
         if len(document_json['media_files']) > 0:
-            await delete_media_files(StringFromUUID(document_json['media_files']))
+            try:
+                await delete_media_files(StringFromUUID(document_json['media_files']))
+            except Exception as ex: 
+                print(ex)
         count = document_object.delete()
         if count != 0:
             return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})
