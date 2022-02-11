@@ -23,13 +23,9 @@ async def get_current_account(
     user: UserCheckerModel = Depends(UserChecker)
 ):
     '''Get current session account data'''
-    try:
-        account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
-        del account["_id"]
-        del account["password"]
-    except BaseException as e:
-        print(e)
-        raise HTTPException(404, {"message": AccountNotFoundResponse().message})
+    account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
+    del account["_id"]
+    del account["password"]
     return account
 
 
@@ -42,10 +38,7 @@ async def get_current_account(
     user: UserCheckerModel = Depends(UserChecker)
 ):
     '''Get notifications from session account'''
-    try:
-        account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
-    except BaseException:
-        raise HTTPException(404, {"message": AccountNotFoundResponse().message})
+    account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
     AccountModel.objects(_id=ObjectId(user['client_id'])).order_by("-creation_date").update(**{'set__notifications__$[]__seen':True})
     return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
 
@@ -80,15 +73,16 @@ async def add_account(
     if PermissionsChecker("admin", user['rank']):
         # Check if username is available
         account_object = AccountModel.objects(username=account.username)
-        password = hash_password(account.new_password)
+        new_id = ObjectId()
         if not account_object:
+            password = hash_password(account.new_password)
             account = AccountModel(
+                _id=new_id,
                 username=account.username,
                 password=password,
                 rank=str(account.rank.value),
                 new_account=True
-            )
-            account = account.save()
+            ).save()
             account_id = loads(account.to_json())["_id"]
             return JSONResponse(status_code=201, content={"id": account_id})
         else:
@@ -111,12 +105,9 @@ async def update_accont(
         account_object = dict(account)
 
         # Check if username is available
-        try:
-            usernames = AccountModel.objects(username=account.username)
-            if usernames:
-                raise HTTPException(403, {"message": "Username is already taken"})
-        except BaseException:
-            pass
+        usernames = AccountModel.objects(username=account.username)
+        if usernames:
+            raise HTTPException(403, {"message": "Username is already taken"})
 
         # Delete not passed properties
         account_object = {

@@ -107,9 +107,8 @@ async def add_document(
         tags=document.tags,
         media_files=media_files,
         fields=fields
-    )
-    document = document_object.save()
-    document_id = loads(document.to_json())["_id"]
+    ).save()
+    document_id = loads(document_object.to_json())["_id"]
     return JSONResponse(status_code=201, content={"id": document_id, "title": title})
 
 
