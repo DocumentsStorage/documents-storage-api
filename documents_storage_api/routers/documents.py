@@ -53,7 +53,7 @@ def createNgrams(all_fields: UpdateDocumentModel):
 
 def createTitle(document, fields):
     # Create document title basing on supplied fields or pushed title
-    if document.title is None or len(document.title) == 0:
+    if len(document.title) == 0:
         title = ""
 
         # Search for first text field
@@ -245,8 +245,9 @@ async def update_document(
         raise HTTPException(404, "Not found document")
 
     tags = []
-    for tag in document.tags:
-        tags.append(tag)
+    if document.tags:
+        for tag in document.tags:
+            tags.append(tag)
 
     fields = []
     for field in document.fields:
@@ -257,12 +258,9 @@ async def update_document(
 
     media_files = []
     if document.media_files:
-        if len(document.media_files) == 0:
-            media_files = []
-        elif document.media_files:
-            media_files = UUIDFromString(document.media_files)
-        else:
-            media_files = StringFromUUID(document_from_db['media_files'])
+        media_files = UUIDFromString(document.media_files)
+    else:
+        media_files = StringFromUUID(document_from_db['media_files'])
 
     document_object["title"] = createTitle(document, fields)
 
@@ -288,11 +286,11 @@ async def delete_document(
 ):
     '''Delete single document'''
     document_object = DocumentModel.objects(_id=document_id)
-    document_json = loads(document_object.to_json())[0]
-    if len(document_json['media_files']) > 0:
-        await delete_media_files(StringFromUUID(document_json['media_files']))
-    count = document_object.delete()
-    if count != 0:
-        return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})
-    else:
-        raise HTTPException(404, {"message": DocumentNotFoundResponse().message})
+    if document_object:
+        document_json = loads(document_object.to_json())[0]
+        if len(document_json['media_files']) > 0:
+            await delete_media_files(StringFromUUID(document_json['media_files']))
+        count = document_object.delete()
+        if count != 0:
+            return JSONResponse(status_code=200, content={"message": DocumentDeletionResponse().message})
+    raise HTTPException(404, {"message": DocumentNotFoundResponse().message})

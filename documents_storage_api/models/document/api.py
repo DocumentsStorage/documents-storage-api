@@ -27,7 +27,7 @@ example = {
 # Input Models
 
 
-_create_fields = DocumentModelAPI.__fields__.keys()
+_create_fields = DocumentModelAPI.__fields__.keys() - {'title'}
 
 
 class CreateDocumentModel(DocumentModelAPI, optional_fields=_create_fields):

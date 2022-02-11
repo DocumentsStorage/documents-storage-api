@@ -13,7 +13,6 @@ def get_authorization_header():
         "/token",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         data=f'username={username}&password={password}')
-    # print(response.json())
     assert response.status_code == 200
     res = response.json()
     if 'token_type' in res:
