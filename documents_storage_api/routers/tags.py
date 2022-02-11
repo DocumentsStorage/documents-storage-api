@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.get("/",
+@router.get("",
             responses={
                 200: {"description": "Tag was found"},
                 404: {"model": SomeTagsNotFoundResponse}
@@ -36,7 +36,10 @@ async def get_tags_by_ids(tags_ids: List[PydanticObjectId] = Query(None)):
                 200: {"description": "Returned tags"},
                 404: {"model": NoTagsFoundResponse}
             })
-async def get_tags_list(skip: int = 0, limit: int = 30):
+async def get_tags_list(
+    skip: int = 0,
+    limit: int = 30
+    ):
     tags_list = loads(TagModel.objects()[skip:skip + limit].to_json())
     return JSONResponse(status_code=200, content={"tags": tags_list})
 
@@ -79,4 +82,4 @@ async def delete_tags(
     if deleted_tags == 1:
         return JSONResponse(status_code=200, content={"message": TagDeletionResponse().message})
     else:
-        raise HTTPException(404, detail={"message": NoTagsFoundResponse().message()})
+        raise HTTPException(404, detail={"message": NoTagsFoundResponse().message})

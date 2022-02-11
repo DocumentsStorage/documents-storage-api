@@ -27,7 +27,7 @@ example = {
 # Input Models
 
 
-_create_fields = DocumentModelAPI.__fields__.keys()
+_create_fields = DocumentModelAPI.__fields__.keys() - {'title'}
 
 
 class CreateDocumentModel(DocumentModelAPI, optional_fields=_create_fields):
@@ -35,7 +35,7 @@ class CreateDocumentModel(DocumentModelAPI, optional_fields=_create_fields):
         schema_extra = example
 
 
-_update_fields = DocumentModelAPI.__fields__.keys()
+_update_fields = DocumentModelAPI.__fields__.keys() - {'fields', 'title'}
 
 
 class UpdateDocumentModel(DocumentModelAPI, optional_fields=_update_fields):
