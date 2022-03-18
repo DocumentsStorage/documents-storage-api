@@ -42,13 +42,16 @@ async def get_tags_by_ids(tags_ids: List[PydanticObjectId] = Query(None)):
                 404: {"model": NoTagsFoundResponse}
             })
 async def search(
-    search_text: str = Query(..., min_length=1),
+    search_text: List[str] = Query([""]),
     skip: int = 0,
     limit: int = 4
     ):
     ngrams = []
+
     for word in search_text:
-        ngrams.append(word) if len(word) > 2 else ...
+        if len(word) > 2:
+            ngrams.append(word) 
+
     tags_list = loads(TagModel.objects(ngrams__in=ngrams)[skip:skip + limit].to_json())
     return JSONResponse(status_code=200, content={"tags": tags_list})
 
