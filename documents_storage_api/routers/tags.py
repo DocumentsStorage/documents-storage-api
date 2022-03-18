@@ -8,7 +8,12 @@ from middlewares.require_auth import UserChecker
 from models.common import PydanticObjectId
 from models.tag.api import CreateTagModel
 from models.tag.base import TagModel
-from models.tag.responses import NoTagsFoundResponse, SomeTagsNotFoundResponse, TagDeletionResponse, TagUpdatedResponse
+from models.tag.responses import (
+    NoTagsFoundResponse, 
+    SomeTagsNotFoundResponse,
+    TagDeletionResponse,
+    TagUpdatedResponse
+)
 from services.ngram import create_ngram, filter_text
 
 router = APIRouter(
@@ -76,7 +81,7 @@ async def add_tag(
 @router.put("/{tag_id}",
             responses={200: {"model": TagUpdatedResponse},
                        404: {"model": NoTagsFoundResponse}})
-async def update_document(
+async def update_tag(
     name: str,
     tag_id: PydanticObjectId = Path(..., title="The ID of the tag to update")
 ):

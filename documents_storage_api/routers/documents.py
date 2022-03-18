@@ -119,7 +119,8 @@ async def search_documents(
     limit: int = 30,
     search_text: List[str] = Query([""]),
     order_by: str = "creation_date",
-    order: int = 1
+    order: int = 1,
+    tag_ids: List[PydanticObjectId] = Query([])
 ):
     '''
     Search documents by text, words with length higher or equal to 3 will be searched with ngrams,
@@ -138,13 +139,17 @@ async def search_documents(
     else:
         query = (MQ(ngrams__contains=last_word))
 
+    if len(tag_ids) > 0:
+        query = query & MQ(tags=tag_ids)
+
     if order_by not in ['creation_date', 'modification_date']:
         pipeline = [
             {
                 '$match': {
                      "$and": [
                         ({"ngrams": {"$in": ngrams}} if len(ngrams) > 0 else {}),
-                        {"fields.name": order_by}]
+                        {"fields.name": order_by}
+                    ]
                 }
             }, {
                 '$addFields': {
