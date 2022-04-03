@@ -50,9 +50,11 @@ async def search(
 
     for word in search_text:
         if len(word) > 2:
-            ngrams.append(word) 
-
+            ngrams.append(word)
     tags_list = loads(TagModel.objects(ngrams__in=ngrams)[skip:skip + limit].to_json())
+    for tag in tags_list:
+        del tag['ngrams']
+
     return JSONResponse(status_code=200, content={"tags": tags_list})
 
 
@@ -66,6 +68,8 @@ async def get_tags_list(
     limit: int = 30
     ):
     tags_list = loads(TagModel.objects()[skip:skip + limit].to_json())
+    for tag in tags_list:
+        del tag['ngrams']
     return JSONResponse(status_code=200, content={"tags": tags_list})
 
 
