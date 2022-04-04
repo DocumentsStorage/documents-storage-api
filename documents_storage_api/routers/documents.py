@@ -140,12 +140,13 @@ async def search_documents(
     else:
         if len(last_word) > 0: 
             query = (MQ(ngrams__contains=last_word))
-
-    if len(tag_ids) > 0:
-        if type(query) is MQ:
-            query = query & MQ(tags__all=tag_ids)
-        else:
-            query = MQ(tags__all=tag_ids)
+    
+    if type(tag_ids) is not Query:
+        if len(tag_ids) > 0:
+            if type(query) is MQ:
+                query = query & MQ(tags__all=tag_ids)
+            else:
+                query = MQ(tags__all=tag_ids)
 
     if order_by not in ['creation_date', 'modification_date']:
         pipeline = [

@@ -67,10 +67,12 @@ async def get_tags_list(
     skip: int = 0,
     limit: int = 30
     ):
-    tags_list = loads(TagModel.objects()[skip:skip + limit].to_json())
+    tags = TagModel.objects()
+    tags_number = len(tags)
+    tags_list = loads(tags[skip:skip + limit].to_json())
     for tag in tags_list:
         del tag['ngrams']
-    return JSONResponse(status_code=200, content={"tags": tags_list})
+    return JSONResponse(status_code=200, content={"total": tags_number, "tags": tags_list})
 
 
 @router.post("", responses={
