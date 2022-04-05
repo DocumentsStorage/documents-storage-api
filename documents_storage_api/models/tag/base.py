@@ -1,5 +1,5 @@
 from mongoengine import Document
-from mongoengine.fields import StringField
+from mongoengine.fields import StringField, ListField
 
 from typing import Optional
 from pydantic import BaseModel, validator
@@ -35,4 +35,5 @@ class TagModelAPI(BaseModel):
 class TagModel(Document):
     '''Tag model for mongoengine'''
     meta = {"collection": "tags"}
+    ngrams = ListField(StringField())
     name = StringField(unique=True)
