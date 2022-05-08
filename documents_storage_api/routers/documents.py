@@ -2,7 +2,7 @@ from difflib import get_close_matches
 from enum import Enum
 from bson.objectid import ObjectId
 from mongoengine.queryset.visitor import Q as MQ
-from datetime import datetime
+from datetime import datetime, timezone
 from json import loads
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
@@ -101,7 +101,7 @@ async def add_document(
     document_object = DocumentModel(
         _id=new_id,
         ngrams=createNgrams(document),
-        creation_date=datetime.now(),
+        creation_date=datetime.now(timezone.utc),
         title=title,
         description=document.description,
         tags=document.tags,
@@ -282,7 +282,7 @@ async def update_document(
 
     DocumentModel.objects(_id=document_id).update(
         ngrams=createNgrams(document),
-        modification_date=datetime.now(),
+        modification_date=datetime.now(timezone.utc),
         title=document_from_db['title'],
         description=document_from_db['description'],
         set__tags=tags,

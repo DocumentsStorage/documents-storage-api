@@ -39,8 +39,9 @@ async def get_current_account(
 ):
     '''Get notifications from session account'''
     account = loads(AccountModel.objects.get(_id=ObjectId(user['client_id'])).to_json())
-    AccountModel.objects(_id=ObjectId(user['client_id'])).order_by("-creation_date").update(**{'set__notifications__$[]__seen':True})
-    return JSONResponse({"notifications": account["notifications"][skip:skip + limit]}, 200)
+    notifications = sorted(account["notifications"], key=lambda d: d['creation_date']['$date'], reverse=True) 
+    AccountModel.objects(_id=ObjectId(user['client_id'])).update(**{'set__notifications__$[]__seen':True})
+    return JSONResponse({"notifications": notifications[skip:skip + limit]}, 200)
 
 
 @router.get("/list",

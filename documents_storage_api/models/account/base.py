@@ -53,7 +53,7 @@ class AccountModelAPI(BaseModel):
 
 class NotificationModel(EmbeddedDocument):
     text = StringField()
-    creation_date = DateTimeField(default=datetime.datetime.now())
+    creation_date = DateTimeField()
     seen = BooleanField(default=False)
 
 class AccountModel(Document):

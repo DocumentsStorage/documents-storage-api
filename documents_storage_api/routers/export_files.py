@@ -6,7 +6,7 @@ import uuid
 import tarfile
 from bson.objectid import ObjectId
 from json import dumps, loads
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Query
@@ -71,8 +71,9 @@ def build_archive(
                         tar.add(entry.path, arcname=str(pathlib.Path("media_files", str(pathlib.Path(entry.name)))))
 
     file_url = f'http://{os.getenv("HOST_IP")}:{os.getenv("API_PORT")}/export/{file_id}'
-    notification_text = f'Archived files are available (until {datetime.now()+timedelta(hours=24)}) to be downloaded from: {file_url}'
-    AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+    notification_text = f'Archived files are available for 24 hours since this notification has been added, downloaded from: {file_url}'
+    current_date = datetime.now(timezone.utc)
+    AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text, creation_date=current_date))
     t1 = threading.Timer(60*60*24, remove_archive_file, [file_path])
     t1.start()
 
