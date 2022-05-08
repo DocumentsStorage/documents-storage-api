@@ -1,7 +1,7 @@
-name: CodeCov
+name: Code Test Coverage and Security
 on: [push, pull_request]
 jobs:
-  run:
+  codecov:
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
@@ -41,3 +41,18 @@ jobs:
         files: coverage.xml
         fail_ci_if_error: true
         verbose: true
+    security:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@master
+        - name: Run Snyk to check for vulnerabilities
+          uses: snyk/actions/python@master
+          continue-on-error: true
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          with:
+            args: --sarif-file-output=snyk.sarif
+        - name: Upload result to GitHub Code Scanning
+          uses: github/codeql-action/upload-sarif@v1
+          with:
+            sarif_file: snyk.sarif
