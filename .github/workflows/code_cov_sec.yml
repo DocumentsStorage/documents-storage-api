@@ -41,18 +41,38 @@ jobs:
         files: coverage.xml
         fail_ci_if_error: true
         verbose: true
-  security:
+  code_security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      - name: Run Snyk to check for python vulnerabilities
         uses: snyk/actions/python@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk.sarif
+          args: --sarif-file-output=snyk.code.sarif
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: snyk.sarif
+          sarif_file: snyk.code.sarif
+  config_security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Mkdir results-dir
+        run: mkdir -p results-dir
+      - name: Run KICS Scan with SARIF result
+        uses: checkmarx/kics-github-action@v1.5
+        with:
+          path: './'
+          output_path: results-dir
+          output_formats: 'sarif'
+      - name: Show results
+        run: |
+          cat results-dir/results.sarif
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: results-dir/results.sarif
