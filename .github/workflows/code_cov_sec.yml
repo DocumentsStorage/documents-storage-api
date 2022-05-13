@@ -67,6 +67,7 @@ jobs:
         uses: checkmarx/kics-github-action@v1.5
         with:
           path: './'
+          ignore_on_exit: results
           output_path: results-dir
           output_formats: 'sarif'
       - name: Show results
