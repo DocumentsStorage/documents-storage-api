@@ -34,6 +34,9 @@ def extract_archive(archive_bytes):
         print(e)
 
     file = tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:gz")
+    for entry in file:
+        if os.path.isabs(entry.name) or ".." in entry.name:
+            raise ValueError("Illegal tar archive entry")
     file.extractall(EXTRACTED_TAR_FILE_PATH)
 
 # Parse json documents to mongoengine models
