@@ -1,10 +1,9 @@
 FROM python:3.9-alpine3.13
-MAINTAINER Daniel Goliszewski "taafeenn@gmail.com"
-LABEL version="0.8.3"
+LABEL maintainer="Daniel Goliszewski taafeenn@gmail.com"
+LABEL version="0.8.4"
 WORKDIR /usr/src/app/documents-storage-api
-COPY requirements.txt ./
-RUN apk add --update musl-dev gcc libffi-dev git
-RUN pip install -r requirements.txt
 COPY . .
+RUN apk add musl-dev=1.2.2-r1 gcc=10.2.1_pre1-r3 libffi-dev=3.3-r2 git=2.30.3-r0
+RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 CMD ["python", "documents_storage_api/main.py"]

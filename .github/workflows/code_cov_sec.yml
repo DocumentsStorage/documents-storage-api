@@ -68,6 +68,7 @@ jobs:
         with:
           path: './'
           ignore_on_exit: results
+          fail_on: high,medium
           output_path: results-dir
           output_formats: 'sarif'
       - name: Show results
