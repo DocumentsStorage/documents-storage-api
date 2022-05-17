@@ -67,7 +67,9 @@ jobs:
         uses: checkmarx/kics-github-action@v1.5
         with:
           path: './'
+          exclude_queries: 451d79dc-0588-476a-ad03-3c7f0320abb3
           ignore_on_exit: results
+          fail_on: high
           output_path: results-dir
           output_formats: 'sarif'
       - name: Show results
