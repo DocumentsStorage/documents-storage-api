@@ -18,13 +18,15 @@ With `docker <https://docs.docker.com/engine/install/>`_ (recommended)
 
   #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) './ds' 'localhost' 5001 5000``
   #. Go to http://localhost:5000/
-  #. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+  #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 - Windows
 
   #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 './ds' 'localhost' 5001 5000``
   #. Go to http://localhost:5000/
-  #. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+  #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 --------------------------------
 Standalone (Advanced)
@@ -40,7 +42,8 @@ Standalone (Advanced)
 #. Build UI ``npm run build``
 #. Serve UI ``npm start``
 #. Go to http://localhost:5000/
-#. Login to admin account, username: ``admin``; password: ``documents-storage-supervisor`` and change account data
+#. See documents-storage-api logs to copy generated password
+#. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 
 

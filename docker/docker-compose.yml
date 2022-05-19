@@ -1,4 +1,5 @@
 version: "3.3"
+
 services:
   documents-storage-api:
     container_name: documents-storage-api
@@ -10,10 +11,10 @@ services:
     ports:
       - ${API_PORT}:8000
     volumes:
-      - documents-storage-data/api:/usr/src/app/documents-storage-api/data
+      - documents_storage_data:/usr/src/app/documents-storage-api
     networks:
-      - documents-storage-fe
-      - documents-storage-be
+      - documents_storage_fe
+      - documents_storage_be
 
   documents-storage-ui:
     container_name: documents-storage-ui
@@ -22,7 +23,7 @@ services:
     ports:
       - ${APP_PORT}:5000
     networks:
-      - documents-storage-fe
+      - documents_storage_fe
 
   mongo-ds:
     container_name: documents-storage-db
@@ -30,13 +31,13 @@ services:
     restart: always
     image: mongo
     volumes:
-      - documents-storage-data/db:/data/db
+      - documents_storage_data:/data
     networks:
-      - documents-storage-be
+      - documents_storage_be
 
 networks:
-  documents-storage-fe:
-  documents-storage-be:
+  documents_storage_fe:
+  documents_storage_be:
 
 volumes:
-  documents-storage-data:
+  documents_storage_data:
