@@ -25,11 +25,11 @@ services:
     networks:
       - documents_storage_fe
 
-  mongo-ds:
+  documents-storage-db:
     container_name: documents-storage-db
-    hostname: mongo-ds
+    hostname: documents-storage-db
     restart: always
-    image: mongo
+    image: mongo:4.0
     volumes:
       - documents_storage_data:/data
     networks:

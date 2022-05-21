@@ -2,13 +2,19 @@ version: "3.0"
 services:
   documents-storage-api-test:
     container_name: documents-storage-api-test
+    hostname: documents-storage-api-test
     build:
       context: ../
       dockerfile: test.dockerfile
-    hostname: documents-storage-api
-    links:
-      - mongo-ds-test
-  mongo-ds-test:
+    networks:
+      - documents_storage_test
+
+  documents-storage-db-test:
     container_name: documents-storage-db-test
-    hostname: mongo-ds-test
-    image: mongo
+    hostname: documents-storage-db-test
+    image: mongo:4.0
+    networks:
+      - documents_storage_test
+
+networks:
+  documents_storage_test:

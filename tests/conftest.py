@@ -5,7 +5,7 @@ import pytest
 client = TestClient(app)
 
 username = "admin"
-password = "documents-storage-supervisor"
+password = "test_password"
 
 @pytest.fixture
 def get_authorization_header():
@@ -16,6 +16,8 @@ def get_authorization_header():
     assert response.status_code == 200
     res = response.json()
     if 'token_type' in res:
+        print("WORKS")
         return {"Authorization": res['token_type'] + " " + res['access_token']}
     else:
+        print("NOT WORKS")
         return {"Authorization": res['access_token']}

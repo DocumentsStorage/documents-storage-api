@@ -81,7 +81,7 @@ Testing
 With Docker-Compose
 -------------------
 #. Go to ``tests`` directory and run
-``docker-compose build && docker-compose up --attach documents-storage-api-test  -V --force-recreate --abort-on-container-exit``
+``docker-compose up --build --attach --abort-on-container-exit && docker-compose rm -fsv && docker image rm tests_documents-storage-api-test && docker network rm tests_documents_storage_test``
 
 --------------
 Without Docker

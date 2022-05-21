@@ -79,6 +79,7 @@ try:
         serverSelectionTimeoutMS=3000
     )
     connection = connection.server_info()
+    print("---------------------------")
     print("Connected with database")
     create_admin_account()
     create_predefined_document_types()
