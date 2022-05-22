@@ -15,8 +15,8 @@ Installation
 With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
 ----------------------------------------------------------------------
 #. Create docker-compose.yml file
-  .. literalinclude:: docker-compose.default.yml
-    :language: docker
+.. literalinclude:: docker-compose.default.yml
+  :language: docker
 #. Run within directory: ``docker-compose up -d``
 #. Run ``docker container logs documents-storage-api`` to copy generated password
 #. Go to http://localhost:5000/
