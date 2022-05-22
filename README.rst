@@ -14,13 +14,52 @@ Installation
 ----------------------------------------------------------------------
 With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
 ----------------------------------------------------------------------
-#. Create docker-compose.yml file
-.. literalinclude:: docker-compose.default.yml
-  :language: docker
-#. Run within directory: ``docker-compose up -d``
-#. Run ``docker container logs documents-storage-api`` to copy generated password
-#. Go to http://localhost:5000/
-#. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
+1. Create docker-compose.yml file
+::
+  version: "3.3"
+  services:
+    documents-storage-api:
+      container_name: documents-storage-api
+      restart: always
+      build:
+        context: ../
+        dockerfile: start.dockerfile
+      hostname: documents-storage-api
+      ports:
+        - ${API_PORT}:8000
+      volumes:
+        - documents_storage_data:/usr/src/app/documents-storage-api
+      networks:
+        - documents_storage_fe
+        - documents_storage_be
+    documents-storage-ui:
+      container_name: documents-storage-ui
+      restart: always
+      build: ../../documents-storage-ui
+      ports:
+        - ${UI_PORT}:5000
+      networks:
+        - documents_storage_fe
+    documents-storage-db:
+      container_name: documents-storage-db
+      hostname: documents-storage-db
+      restart: always
+      image: mongo:5.0.5
+      volumes:
+        - documents_storage_db:/data/db
+      networks:
+        - documents_storage_be
+  networks:
+    documents_storage_fe:
+    documents_storage_be:
+  volumes:
+    documents_storage_data:
+    documents_storage_db:
+
+2. Run within directory: ``docker-compose up -d``
+3. Run ``docker container logs documents-storage-api`` to copy generated password
+4. Go to http://localhost:5000/
+5. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 ----------------------------------------------------------------------
 With `docker building <https://docs.docker.com/engine/install/>`_ (A bit longer)
