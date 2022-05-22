@@ -5,9 +5,6 @@ API_HOST=$1
 export API_PORT=$2
 export APP_PORT=$3
 
-# Variables
-JWT_SECRET=$RANDOM
-
 # Update API .env
 printf "PYTHONPATH=documents_storage_api
 DEBUG=False
