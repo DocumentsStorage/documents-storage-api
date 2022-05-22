@@ -4,18 +4,18 @@ import os
 import pathlib
 import uuid
 import tarfile
-from bson.objectid import ObjectId
 from json import dumps, loads
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Query
 from starlette.responses import FileResponse
-from models.account.base import AccountModel, NotificationModel
+from models.account.base import AccountModel
 from models.common import  PydanticObjectId, PydanticUUIDString, UUIDFromString, flat_map
 from middlewares.require_auth import PermissionsChecker, UserChecker, UserCheckerModel
 from models.document.base import DocumentModel
 from routers.documents import StringFromUUID
+from services.notifications import add_notification
 from services.paths import MEDIA_FILES_PATH, TEMP_PATH
 
 
@@ -71,9 +71,7 @@ def build_archive(
                         tar.add(entry.path, arcname=str(pathlib.Path("media_files", str(pathlib.Path(entry.name)))))
 
     file_url = f'http://{os.getenv("HOST_IP")}:{os.getenv("API_PORT")}/export/{file_id}'
-    notification_text = f'Archived files are available for 24 hours since this notification has been added, downloaded from: {file_url}'
-    current_date = datetime.now(timezone.utc)
-    AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text, creation_date=current_date))
+    add_notification(account_id_to_notify,  f'Archived files are available for 24 hours since this notification has been added, downloaded from: {file_url}')
     t1 = threading.Timer(60*60*24, remove_archive_file, [file_path])
     t1.start()
 

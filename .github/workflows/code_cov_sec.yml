@@ -27,6 +27,7 @@ jobs:
         export PYTHONPATH=documents_storage_api
         printf "PYTHONPATH=documents_storage_api \n \
         DEBUG=True \n \
+        TEST=True \n \
         DB_URL=mongodb://127.0.0.1:27017/documents-storage \n \
         HOST_IP=127.0.0.1 \n \
         API_HOST=127.0.0.1 \n \

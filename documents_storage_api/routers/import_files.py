@@ -6,15 +6,15 @@ import shutil
 import tarfile
 from shutil import copytree
 from json import load
-from bson.objectid import ObjectId
 from datetime import datetime
 from mongoengine import BulkWriteError
 from fastapi import APIRouter, Depends, File, UploadFile, Response
 from bson.objectid import ObjectId as BsonObjectId
 from models.account.base import AccountModel, AccountModelAPI, NotificationModel, NotificationModelAPI
 from middlewares.require_auth import PermissionsChecker, UserChecker, UserCheckerModel
-from models.common import PydanticObjectId, UUIDFromString
+from models.common import UUIDFromString
 from models.document.base import DocumentFieldModel, DocumentModel
+from services.notifications import add_notification
 from services.paths import MEDIA_FILES_PATH, TEMP_PATH
 
 EXTRACTED_TAR_FILE_PATH = pathlib.Path(TEMP_PATH, "import")
@@ -82,7 +82,7 @@ def create_account_object_mongo(account_obj: AccountModelAPI):
 
 # Import threads
 
-def import_documents(account_id_to_notify: PydanticObjectId, archive_file, import_images: bool, import_overwrite: bool):
+def import_documents_fn(user: AccountModelAPI, archive_file, import_documents, import_images: bool, import_overwrite: bool):
     extract_archive(archive_file.file.read())
     if import_images:
         copytree(pathlib.Path(EXTRACTED_TAR_FILE_PATH, "media_files"), str(pathlib.Path(MEDIA_FILES_PATH)), dirs_exist_ok=True)
@@ -111,20 +111,17 @@ def import_documents(account_id_to_notify: PydanticObjectId, archive_file, impor
                     except BulkWriteError as bulkErr:
                         print(bulkErr)
                         shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-                        notification_text = f'Documents could not be imported'
-                        AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+                        add_notification(user['client_id'], 'Documents could not be imported')
             except Exception as e:
                 print(e)
                 shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-                notification_text = f'Documents could not be imported'
-                AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+                add_notification(user['client_id'], 'Documents could not be imported')
         shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-        notification_text = f'Documents were imported'
-        AccountModel.objects(_id=ObjectId(account_id_to_notify)).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+        add_notification(user['client_id'], 'Documents were imported')
 
-def import_accounts(user: AccountModelAPI, archive_file):
+def import_accounts_fn(user: AccountModelAPI, archive_file):
     extract_archive(archive_file.file.read())
-    if PermissionsChecker("admin", user.rank):
+    if PermissionsChecker("admin", user['rank']):
         with open(pathlib.Path(EXTRACTED_TAR_FILE_PATH, "accounts.json"), "r") as accounts_file:
             accounts = load(accounts_file)
             accounts_to_save = [create_account_object_mongo(account) for account in accounts]
@@ -134,19 +131,16 @@ def import_accounts(user: AccountModelAPI, archive_file):
                 print(bulkErr)
                 shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
                 notification_text = f'Importing accounts result - Invalid accounts'
-                AccountModel.objects(_id=user._id).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+                
             except Exception as e:
                 print(e)
                 shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-                notification_text = f'Importing accounts result - Could not import accounts'
-                AccountModel.objects(_id=user._id).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+                add_notification(user['client_id'], 'Importing accounts result - Could not import accounts')
         shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-        notification_text = f'Importing accounts result - Imported accounts'
-        AccountModel.objects(_id=user._id).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+        add_notification(user['client_id'], 'Importing accounts result - Imported accounts')
     else:
         shutil.rmtree(EXTRACTED_TAR_FILE_PATH, ignore_errors = False)
-        notification_text = f'Importing accounts result - No sufficient permissions'
-        AccountModel.objects(_id=user._id).update_one(add_to_set__notifications=NotificationModel(text=notification_text))
+        add_notification(user['client_id'], 'Importing accounts result - No sufficient permissions')
 
 
 
@@ -163,9 +157,9 @@ async def import_documents_api(
     '''
     Upload documents with media files
     '''
-    t1 = threading.Thread(target=import_documents_api,
+    t1 = threading.Thread(target=import_documents_fn,
                             kwargs={
-                            'account_id_to_notify': user['client_id'],
+                            'user': user,
                             'archive_file': archive_file, 'import_documents': import_documents, 
                             'import_images': import_images, 'import_overwrite': import_overwrite
                             })
@@ -184,7 +178,11 @@ async def import_accounts_api(
     '''
     Upload accounts archive
     '''
-    t1 = threading.Thread(target=import_accounts, kwargs={'user': user, 'archive_file': archive_file})
+    t1 = threading.Thread(target=import_accounts_fn,
+                            kwargs={
+                            'user': user,
+                            'archive_file': archive_file
+                            })
     t1.start()
     return Response(status_code=201)
     
