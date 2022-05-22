@@ -11,8 +11,6 @@ ENV API_HOST="0.0.0.0"
 
 COPY . .
 
-RUN rm .env
-
 # Append env to file
 RUN printf "PYTHONPATH=documents_storage_api \n \
 DEBUG=False \n \
