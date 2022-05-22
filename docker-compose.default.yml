@@ -1,0 +1,44 @@
+version: "3.3"
+
+services:
+  documents-storage-api:
+    container_name: documents-storage-api
+    restart: always
+    build:
+      context: ../
+      dockerfile: start.dockerfile
+    hostname: documents-storage-api
+    ports:
+      - ${API_PORT}:8000
+    volumes:
+      - documents_storage_data:/usr/src/app/documents-storage-api
+    networks:
+      - documents_storage_fe
+      - documents_storage_be
+
+  documents-storage-ui:
+    container_name: documents-storage-ui
+    restart: always
+    build: ../../documents-storage-ui
+    ports:
+      - ${UI_PORT}:5000
+    networks:
+      - documents_storage_fe
+
+  documents-storage-db:
+    container_name: documents-storage-db
+    hostname: documents-storage-db
+    restart: always
+    image: mongo:5.0.5
+    volumes:
+      - documents_storage_db:/data/db
+    networks:
+      - documents_storage_be
+
+networks:
+  documents_storage_fe:
+  documents_storage_be:
+
+volumes:
+  documents_storage_data:
+  documents_storage_db:

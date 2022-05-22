@@ -8,25 +8,38 @@ DocumentsStorage API
     :target: https://snyk.io/test/github/DocumentsStorage/documents-storage-api
 
 ==============
-How to install
+Installation
 ==============
 
 ----------------------------------------------------------------------
-With `docker <https://docs.docker.com/engine/install/>`_ (recommended)
+With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
+----------------------------------------------------------------------
+#. Create docker-compose.yml file
+.. literalinclude:: docker-compose.dockerhub.yml
+    :linenos:
+    :language: docker
+#. Run within directory: ``docker-compose up -d``
+#. Run ``docker container logs documents-storage-api`` to copy generated password
+#. Go to http://localhost:5000/
+#. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
+
+----------------------------------------------------------------------
+With `docker building <https://docs.docker.com/engine/install/>`_ (A bit longer)
 ----------------------------------------------------------------------
 - Linux/macOS
 
-  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) './ds' 'localhost' 5001 5000``
-  #. Go to http://localhost:5000/
+  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 - Windows
 
-  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 './ds' 'localhost' 5001 5000``
-  #. Go to http://localhost:5000/
+  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
+
 
 --------------------------------
 Standalone (Advanced)
