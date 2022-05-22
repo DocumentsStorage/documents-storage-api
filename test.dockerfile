@@ -1,6 +1,6 @@
 FROM python:3.9-alpine3.13
 LABEL maintainer="Daniel Goliszewski taafeenn@gmail.com"
-LABEL version="0.8.4"
+LABEL version="0.9.0"
 WORKDIR /usr/src/app/documents-storage-api
 
 RUN apk add --no-cache musl-dev=1.2.2-r1 gcc=10.2.1_pre1-r3 libffi-dev=3.3-r2 git=2.30.3-r0

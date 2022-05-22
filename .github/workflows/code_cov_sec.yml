@@ -1,5 +1,5 @@
 name: Code Test Coverage and Security
-on: [push, pull_request]
+on: push
 jobs:
   codecov:
     runs-on: ubuntu-latest
