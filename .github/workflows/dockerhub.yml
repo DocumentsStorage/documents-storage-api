@@ -20,7 +20,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
-          dockerfile: start.dockerfile
+          context: . 
+          file: start.dockerfile
           push: true
           tags: tafeen/documents-storage-api:latest
