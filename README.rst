@@ -8,25 +8,74 @@ DocumentsStorage API
     :target: https://snyk.io/test/github/DocumentsStorage/documents-storage-api
 
 ==============
-How to install
+Installation
 ==============
 
 ----------------------------------------------------------------------
-With `docker <https://docs.docker.com/engine/install/>`_ (recommended)
+With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
+----------------------------------------------------------------------
+1. Create docker-compose.yml file
+::
+  version: "3.3"
+  services:
+    documents-storage-api:
+      container_name: documents-storage-api
+      restart: always
+      image: tafeen/documents-storage-api:v0.9.0
+      hostname: documents-storage-api
+      ports:
+        - ${API_PORT}:8000
+      volumes:
+        - documents_storage_data:/usr/src/app/documents-storage-api
+      networks:
+        - documents_storage_fe
+        - documents_storage_be
+    documents-storage-ui:
+      container_name: documents-storage-ui
+      restart: always
+      image: tafeen/documents-storage-ui:v0.9.0
+      ports:
+        - ${UI_PORT}:5000
+      networks:
+        - documents_storage_fe
+    documents-storage-db:
+      container_name: documents-storage-db
+      hostname: documents-storage-db
+      restart: always
+      image: mongo:5.0.5
+      volumes:
+        - documents_storage_db:/data/db
+      networks:
+        - documents_storage_be
+  networks:
+    documents_storage_fe:
+    documents_storage_be:
+  volumes:
+    documents_storage_data:
+    documents_storage_db:
+
+2. Run within directory: ``docker-compose up -d``
+3. Run ``docker container logs documents-storage-api`` to copy generated password
+4. Go to http://localhost:5000/
+5. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
+
+----------------------------------------------------------------------
+With `docker building <https://docs.docker.com/engine/install/>`_ (A bit longer)
 ----------------------------------------------------------------------
 - Linux/macOS
 
-  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) './ds' 'localhost' 5001 5000``
-  #. Go to http://localhost:5000/
+  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 - Windows
 
-  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 './ds' 'localhost' 5001 5000``
-  #. Go to http://localhost:5000/
+  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
+  #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
+
 
 --------------------------------
 Standalone (Advanced)

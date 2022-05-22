@@ -4,12 +4,12 @@ services:
   documents-storage-api:
     container_name: documents-storage-api
     restart: always
-    build:
-      context: ../
-      dockerfile: start.dockerfile
+    image: tafeen/documents-storage-api:v0.9.0
     hostname: documents-storage-api
+    environment:
+      - HOST_IP="localhost"
     ports:
-      - ${API_PORT}:8000
+      - 8080:8000
     volumes:
       - documents_storage_data:/usr/src/app/documents-storage-api
     networks:
@@ -19,9 +19,12 @@ services:
   documents-storage-ui:
     container_name: documents-storage-ui
     restart: always
-    build: ../../documents-storage-ui
+    image: tafeen/documents-storage-ui:v0.9.0
+    environment:
+      - API_URL="http://localhost:8080"
+    build: ../documents-storage-ui
     ports:
-      - ${APP_PORT}:5000
+      - 5000:5000
     networks:
       - documents_storage_fe
 
