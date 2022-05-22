@@ -4,10 +4,7 @@ services:
   documents-storage-api:
     container_name: documents-storage-api
     restart: always
-    build:
-      context: .
-      dockerfile: start.dockerfile
-    # image: tafeen/documents-storage-api:v0.9.0
+    image: tafeen/documents-storage-api:v0.9.0
     hostname: documents-storage-api
     environment:
       - HOST_IP="localhost"
@@ -22,7 +19,7 @@ services:
   documents-storage-ui:
     container_name: documents-storage-ui
     restart: always
-    # image: tafeen/documents-storage-ui:v0.9.0
+    image: tafeen/documents-storage-ui:v0.9.0
     environment:
       - API_URL="http://localhost:8080"
     build: ../documents-storage-ui

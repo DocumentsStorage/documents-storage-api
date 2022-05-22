@@ -21,9 +21,7 @@ With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
     documents-storage-api:
       container_name: documents-storage-api
       restart: always
-      build:
-        context: ../
-        dockerfile: start.dockerfile
+      image: tafeen/documents-storage-api:v0.9.0
       hostname: documents-storage-api
       ports:
         - ${API_PORT}:8000
@@ -35,7 +33,7 @@ With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
     documents-storage-ui:
       container_name: documents-storage-ui
       restart: always
-      build: ../../documents-storage-ui
+      image: tafeen/documents-storage-ui:v0.9.0
       ports:
         - ${UI_PORT}:5000
       networks:
