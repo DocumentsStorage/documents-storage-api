@@ -29,9 +29,9 @@ services:
     container_name: documents-storage-db
     hostname: documents-storage-db
     restart: always
-    image: mongo:4.0
+    image: mongo:5.0.5
     volumes:
-      - documents_storage_data:/data
+      - documents_storage_db:/data/db
     networks:
       - documents_storage_be
 
@@ -41,3 +41,4 @@ networks:
 
 volumes:
   documents_storage_data:
+  documents_storage_db:
