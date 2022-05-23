@@ -3,7 +3,9 @@ LABEL maintainer="Daniel Goliszewski taafeenn@gmail.com"
 LABEL version="0.9.1"
 WORKDIR /usr/src/app/documents-storage-api
 
-RUN apk add --no-cache musl-dev=1.2.2-r1 gcc=10.2.1_pre1-r3 libffi-dev=3.3-r2 git=2.30.3-r0
+RUN apk add --no-cache musl-dev=1.2.2-r1 gcc=10.2.1_pre1-r3 libffi-dev=3.3-r2 git=2.30.3-r0 curl=7.79.1-r1
+
+HEALTHCHECK CMD curl --fail http://0.0.0.0:8000/ping || exit 1
 
 # Set env
 ENV HOST_IP="localhost"
@@ -25,6 +27,7 @@ API_ORIGINS=['*']" > .env
 RUN addgroup -S documents-storage && adduser -u 1500 -S documents-storage -G documents-storage
 RUN chown 1500:1500 /usr/src/app/documents-storage-api
 USER documents-storage
+
 
 RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000

@@ -22,4 +22,5 @@ API_ORIGINS=['*']" | Out-File -Encoding utf8 -FilePath .\documents-storage-api\.
 # Update UI .env
 "API_URL=http://${API_HOST}:${API_PORT}" | Out-File -Encoding utf8 -FilePath .\documents-storage-ui\.env
 
-docker-compose up -d --build -f docker-compose.default.yml
+cd documents-storage-api
+docker-compose -f docker-compose.default.yml up -d --build
