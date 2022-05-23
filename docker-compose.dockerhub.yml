@@ -9,7 +9,7 @@ services:
     environment:
       - HOST_IP="localhost"
     ports:
-      - 8080:8000
+      - 8000:8000
     volumes:
       - documents_storage_data:/usr/src/app/documents-storage-api
     networks:
@@ -22,7 +22,6 @@ services:
     image: tafeen/documents-storage-ui:v0.9.1
     environment:
       - API_URL="http://localhost:8080"
-    build: ../documents-storage-ui
     ports:
       - 5000:5000
     networks:
