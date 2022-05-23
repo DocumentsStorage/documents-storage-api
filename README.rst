@@ -1,11 +1,47 @@
---------------------
+=================
+Documents Storage
+=================
+
+Project enforces you with simple web-based app which allow you to easily manage documents.
+For example storage important invoices, receipts, certificates, and also add scans of those documents.
+
+---------------
+Top Features 🚀
+---------------
+#. Create and modify documents 📄
+#. Upload image or pdf files 💼
+#. Download stored files 📥
+#. Create own document types to streamline your workflow 🔧
+#. Tagging system 🏷
+#. Manage accounts 👨‍🔧
+#. OpenAPI - connect anything to Documents Storage 📲
+
+====================
 DocumentsStorage API
---------------------
+====================
 
 .. image:: https://codecov.io/gh/DocumentsStorage/documents-storage-api/branch/master/graph/badge.svg?token=7PH4PIYS54
     :target: https://codecov.io/gh/DocumentsStorage/documents-storage-api
 .. image:: https://snyk.io/test/github/DocumentsStorage/documents-storage-api/badge.svg
     :target: https://snyk.io/test/github/DocumentsStorage/documents-storage-api
+
+==============
+Table Of Contents
+==============
+- `Installation`_.
+    - `With docker prebuilt (recommended)`_.
+    - `With docker building (A bit longer)`_.
+    - `Standalone (Advanced)`_.
+- `Update`_.
+    - `Docker - prebuilt`_.
+    - `Docker - built`_.
+    - `Standalone`_.
+- `Development`_.
+    - `With poetry`_.
+    - `Without poetry`_.
+- `Testing`_.
+    - `With Docker-Compose`_.
+    - `Without Docker-Compose`_.
 
 ==============
 Installation
@@ -24,7 +60,7 @@ With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
       image: tafeen/documents-storage-api:v0.9.0
       hostname: documents-storage-api
       ports:
-        - ${API_PORT}:8000
+        - 8000:8000
       volumes:
         - documents_storage_data:/usr/src/app/documents-storage-api
       networks:
@@ -35,7 +71,7 @@ With `docker prebuilt <https://docs.docker.com/engine/install/>`_ (recommended)
       restart: always
       image: tafeen/documents-storage-ui:v0.9.0
       ports:
-        - ${UI_PORT}:5000
+        - 5000:5000
       networks:
         - documents_storage_fe
     documents-storage-db:
@@ -64,14 +100,14 @@ With `docker building <https://docs.docker.com/engine/install/>`_ (A bit longer)
 ----------------------------------------------------------------------
 - Linux/macOS
 
-  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_nix.sh) 'localhost' 5001 5000``
+  #. Run from terminal: ``bash <(curl -s https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/build_nix.sh) 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
   #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 - Windows
 
-  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/install_windows.ps1 -OutFile .\install_windows.ps1; .\install_windows.ps1 'localhost' 5001 5000``
+  #. Run from PowerShell: ``Invoke-WebRequest https://raw.githubusercontent.com/DocumentsStorage/documents-storage-api/master/build_windows.ps1 -OutFile .\build_windows.ps1; .\build_windows.ps1 'localhost' 5001 5000``
   #. Run ``docker container logs documents-storage-api`` to copy generated password
   #. Go to http://localhost:5000/
   #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
@@ -95,6 +131,30 @@ Standalone (Advanced)
 #. Login to admin account with username: ``admin`` and generated password, after it, it is advised to change account password
 
 
+======
+Update
+======
+-----------------
+Docker - prebuilt
+-----------------
+#. Go to docker-compose file
+#. Update docker-compose.default.yml images versions
+#. Run ``docker-compose -f docker-compose.default.yml up -d --build``
+
+--------------
+Docker - built
+--------------
+#. Go to documents-storage-api directory
+#. Run ``docker-compose -f docker-compose.default.yml stop && docker-compose -f docker-compose.default.yml  rm && docker-compose -f docker-compose.default.yml up -d --build``
+#. Update docker-compose.default.yml images versions
+#. Run ``docker-compose -f docker-compose.default.yml up -d --build``
+
+----------
+Standalone 
+----------
+#. Go to documents-storage-api and backup data
+#. Run in api and ui directory ``git checkout tags/v1.0.0`` (select tag version)
+#. Reuse backuped data with new version of app
 
 ===========
 Development
@@ -132,9 +192,9 @@ With Docker-Compose
 #. Go to ``tests`` directory and run
 ``docker-compose up --build --attach --abort-on-container-exit && docker-compose rm -fsv && docker image rm tests_documents-storage-api-test && docker network rm tests_documents_storage_test``
 
---------------
-Without Docker
---------------
+----------------------
+Without Docker-Compose
+----------------------
 #. Make sure you have installed API with steps listed before.
 #. While tesiting export path for API files ``export PYTHONPATH=documents_storage_api``
 #. Run command with poetry : ``poetry shell`` and run ``pytest``; or without poetry just run ``pytest``
