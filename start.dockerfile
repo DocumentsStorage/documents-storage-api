@@ -13,14 +13,6 @@ ENV HOST_IP ${HOST_IP}
 
 COPY . .
 
-# Append env to file
-RUN printf " \
-DEBUG=False \n \
-TEST=False \n \
-DB_URL=mongodb://documents-storage-db:27017/documents-storage \n \
-API_PORT=8000 \n \
-API_ORIGINS=['*'] \n" > .env
-
 # Set user
 RUN addgroup -S documents-storage && adduser -u 1500 -S documents-storage -G documents-storage
 RUN chown -R 1500:1500 /usr/src/app/documents-storage-api
