@@ -8,8 +8,6 @@ services:
       dockerfile: test.dockerfile
     networks:
       - documents_storage_test
-    volumes:
-      - /usr/src/app/documents-storage-api
 
   documents-storage-db-test:
     container_name: documents-storage-db-test
