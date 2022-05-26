@@ -117,7 +117,7 @@ async def add_document(
 async def search_documents(
     skip: int = 0,
     limit: int = 30,
-    search_text: List[str] = Query([""]),
+    search_text: str = "",
     tag_ids: List[PydanticObjectId] = Query([]),
     order_by: str = "creation_date",
     order: int = 1,
@@ -127,8 +127,9 @@ async def search_documents(
     other words (with length < 3) will be searched by regex (slower). <br/>
     If there is only need to obtain documents without sorting/filtering dont use 'search_text' and 'order_by'.
     '''
+    
     ngrams, other_words = [], ['']
-    for word in search_text:
+    for word in search_text.split(" "):
         ngrams.append(word) if len(word) > 2 else other_words.append(word)
     last_word = other_words[len(other_words) - 1].lower()
 
@@ -215,7 +216,7 @@ async def autofill(
     max_autofill: int = 2,
     results_for: ResponseTypeEnum = ResponseTypeEnum.search
     ):
-    documents = await search_documents(search_text=[search_text])
+    documents = await search_documents(search_text=search_text)
     if len(documents["documents"]) > 0:
         text_data = []
         if results_for == ResponseTypeEnum.search:
