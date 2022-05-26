@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir pytest==7.1.2 coverage==6.3.3
 
 # Set user
 RUN addgroup -S documents-storage && adduser -u 1500 -S documents-storage -G documents-storage
-RUN chown 1500:1500 /usr/src/app/documents-storage-api
+RUN chown -R 1500:1500 /usr/src/app/documents-storage-api
 USER documents-storage
 
 CMD nohup sh -c "export PYTHONPATH=documents_storage_api && coverage run --source routers -m pytest && coverage report -m"

@@ -12,7 +12,7 @@ services:
   documents-storage-db-test:
     container_name: documents-storage-db-test
     hostname: documents-storage-db-test
-    image: mongo:4.0
+    image: mongo:5.0.5
     networks:
       - documents_storage_test
 
